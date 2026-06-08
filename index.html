@@ -829,9 +829,7 @@ var portalTasks = []; // tasks loaded from portal
 var portalBulId = null;
 
 function sbFetch(table, query) {
-  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  var timeout = controller ? setTimeout(function() { controller.abort(); }, 8000) : null;
-  var opts = {
+  return fetch(SB_URL + '/rest/v1/' + table + '?' + query, {
     method: 'GET',
     mode: 'cors',
     headers: {
@@ -840,18 +838,10 @@ function sbFetch(table, query) {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     }
-  };
-  if (controller) opts.signal = controller.signal;
-  return fetch(SB_URL + '/rest/v1/' + table + '?' + query, opts)
-    .then(function(r) {
-      if (timeout) clearTimeout(timeout);
-      if (!r.ok) return r.text().then(function(t) { throw new Error('HTTP ' + r.status + ': ' + t); });
-      return r.json();
-    })
-    .catch(function(err) {
-      if (timeout) clearTimeout(timeout);
-      throw err;
-    });
+  }).then(function(r) {
+    if (!r.ok) return r.text().then(function(t) { throw new Error('HTTP ' + r.status + ': ' + t); });
+    return r.json();
+  });
 }
 
 function showCorsHelp() {
@@ -872,6 +862,7 @@ function getTasksForNotif(dow) {
   return base.concat(portal).concat(manual);
 }
 
+function getWeekNum(d) {
   var dt = new Date(d); dt.setHours(0,0,0,0);
   dt.setDate(dt.getDate() + 3 - (dt.getDay() + 6) % 7);
   var w1 = new Date(dt.getFullYear(), 0, 4);
