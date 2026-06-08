@@ -12,272 +12,219 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0f1923;
-  --bg2: #16212e;
-  --bg3: #1d2d3e;
-  --bg4: #243549;
-  --accent: #e8b44a;
-  --accent2: #f0c96a;
-  --text: #e8edf2;
-  --muted: #7a909f;
-  --border: rgba(255,255,255,0.07);
-  --red: #e85d5d;
-  --green: #4ec994;
-  --blue: #5b9bd5;
-  --amber: #e8b44a;
-  --r: 12px;
-  --font: 'Outfit', sans-serif;
-  --mono: 'DM Mono', monospace;
-}
+:root{--bg:#0f1923;--bg2:#16212e;--bg3:#1d2d3e;--bg4:#243549;--accent:#e8b44a;--accent2:#f0c96a;--text:#e8edf2;--muted:#7a909f;--border:rgba(255,255,255,0.07);--red:#e85d5d;--green:#4ec994;--blue:#5b9bd5;--amber:#e8b44a;--r:12px;--font:'Outfit',sans-serif;--mono:'DM Mono',monospace}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
-
 /* HEADER */
-.hdr{position:sticky;top:0;z-index:100;background:rgba(15,25,35,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.hdr{position:sticky;top:0;z-index:100;background:rgba(15,25,35,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
 .hdr-logo{display:flex;align-items:center;gap:10px}
-.hdr-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:500;font-size:13px;color:#0f1923;letter-spacing:-.5px}
-.hdr-title{font-size:15px;font-weight:500;color:var(--text)}
+.hdr-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:500;font-size:13px;color:#0f1923}
+.hdr-title{font-size:15px;font-weight:500}
 .hdr-sub{font-size:11px;color:var(--muted);margin-top:1px}
-.hdr-date{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
-.notif-btn{width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
-.notif-btn.on{background:var(--accent);color:#0f1923;border-color:var(--accent)}
-
+.hdr-right{display:flex;align-items:center;gap:8px}
+.hdr-date{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right;line-height:1.4}
+.icon-btn{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;flex-shrink:0}
+.icon-btn.on{background:var(--accent);color:#0f1923;border-color:var(--accent)}
 /* NAV */
-.nav{display:flex;gap:4px;padding:12px 16px 0;overflow-x:auto;scrollbar-width:none}
+.nav{display:flex;gap:4px;padding:10px 16px 0;overflow-x:auto;scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
-.nav-btn{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.nav-btn{flex-shrink:0;padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
 .nav-btn.on{background:var(--accent);color:#0f1923;border-color:var(--accent);font-weight:500}
-
 /* MAIN */
-.main{padding:16px;max-width:680px;margin:0 auto}
+.main{padding:14px 16px;max-width:680px;margin:0 auto;padding-bottom:40px}
 .panel{display:none}.panel.on{display:block}
-
-/* TODAY panel */
-.today-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.today-header h2{font-size:20px;font-weight:600}
-.progress-ring-wrap{display:flex;align-items:center;gap:8px}
-.pct-label{font-family:var(--mono);font-size:13px;color:var(--accent)}
-.section-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px}
-
-/* TASK CARD */
-.task{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.task::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--task-color,var(--border));border-radius:3px 0 0 3px;transition:background .2s}
-.task:hover{border-color:rgba(255,255,255,.15);transform:translateX(2px)}
-.task.done{opacity:.4}
-.task.done .task-title{text-decoration:line-through}
-.task-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--muted);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:12px}
-.task.done .task-check{background:var(--green);border-color:var(--green);color:#0f1923}
-.task-body{flex:1;min-width:0}
-.task-title{font-size:14px;font-weight:400;line-height:1.4;color:var(--text)}
-.task-meta{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
-.task-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;margin-top:4px;font-family:var(--mono)}
-.badge-red{background:rgba(232,93,93,.15);color:var(--red)}
-.badge-amber{background:rgba(232,180,74,.15);color:var(--amber)}
-.badge-blue{background:rgba(91,155,213,.15);color:var(--blue)}
-.badge-green{background:rgba(78,201,148,.15);color:var(--green)}
-
-/* WEEK panel */
-.week-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:16px}
-@media(max-width:560px){.week-grid{grid-template-columns:1fr 1fr}}
-.day-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.day-card.today-col{border-color:rgba(232,180,74,.4)}
-.day-hd{padding:8px 10px;font-size:11px;font-weight:500;border-bottom:1px solid var(--border);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.day-card.today-col .day-hd{color:var(--accent)}
-.day-body{padding:8px}
+/* SECTION LABEL */
+.slbl{font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin:18px 0 7px}
+/* STAT BAR */
+.stat-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:9px 12px;text-align:center}
+.stat-n{font-family:var(--mono);font-size:21px;font-weight:500;line-height:1}
+.stat-l{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.05em}
+/* PROGRESS */
+.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.prog-bar{flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .4s}
+.prog-pct{font-family:var(--mono);font-size:12px;color:var(--accent);min-width:34px;text-align:right}
+/* TASK */
+.task{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:5px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.task::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tc,var(--border));border-radius:3px 0 0 3px}
+.task:hover{border-color:rgba(255,255,255,.14)}
+.task.done{opacity:.38}
+.task.done .t-title{text-decoration:line-through}
+.t-chk{width:21px;height:21px;border-radius:50%;border:1.5px solid var(--muted);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .18s}
+.task.done .t-chk{background:var(--green);border-color:var(--green);color:#0f1923}
+.t-body{flex:1;min-width:0}
+.t-title{font-size:13px;line-height:1.45}
+.t-meta{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--mono);line-height:1.4}
+.bdg{display:inline-block;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:500;margin-top:3px;font-family:var(--mono)}
+.bdg-r{background:rgba(232,93,93,.15);color:var(--red)}
+.bdg-a{background:rgba(232,180,74,.15);color:var(--amber)}
+.bdg-b{background:rgba(91,155,213,.15);color:var(--blue)}
+.bdg-g{background:rgba(78,201,148,.15);color:var(--green)}
+/* BULLETIN TASKS - special weekly ones */
+.task.bulletin{border-color:rgba(232,180,74,.25)}
+.task.bulletin::before{background:var(--amber)}
+/* WEEK */
+.wk-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+@media(max-width:500px){.wk-grid{grid-template-columns:1fr 1fr}}
+.dc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.dc.today{border-color:rgba(232,180,74,.4)}
+.dc-hd{padding:7px 9px;font-size:10px;font-weight:500;border-bottom:1px solid var(--border);color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.dc.today .dc-hd{color:var(--accent)}
+.dc-body{padding:7px}
 .ev{padding:5px 7px;border-radius:6px;font-size:11px;line-height:1.35;margin-bottom:4px}
 .ev strong{display:block;font-weight:500;margin-bottom:1px}
 .ev-r{background:rgba(232,93,93,.12);color:var(--red)}
 .ev-a{background:rgba(232,180,74,.12);color:var(--amber)}
 .ev-b{background:rgba(91,155,213,.12);color:var(--blue)}
 .ev-g{background:rgba(78,201,148,.12);color:var(--green)}
-.ev-gray{background:rgba(255,255,255,.04);color:var(--muted)}
-
-/* MONTH panel */
-.month-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media(max-width:420px){.month-grid{grid-template-columns:1fr}}
-.wk-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
-.wk-card h3{font-size:12px;font-weight:500;color:var(--accent);font-family:var(--mono);margin-bottom:10px;letter-spacing:.04em}
-.mi{display:flex;gap:8px;align-items:flex-start;margin-bottom:5px;font-size:12px;color:var(--text);line-height:1.4}
+.ev-x{background:rgba(255,255,255,.04);color:var(--muted)}
+/* SAP */
+.sap-search{width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:13px;margin-bottom:12px;outline:none;transition:border-color .2s}
+.sap-search:focus{border-color:rgba(232,180,74,.5)}
+.sap-search::placeholder{color:var(--muted)}
+.sap-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden}
+.sap-hd{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;transition:background .15s}
+.sap-hd:hover{background:var(--bg3)}
+.sap-tx{display:flex;align-items:center;gap:10px}
+.sap-code{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);min-width:72px}
+.sap-name{font-size:13px;color:var(--text)}
+.sap-arr{font-size:12px;color:var(--muted);transition:transform .2s}
+.sap-card.open .sap-arr{transform:rotate(90deg)}
+.sap-body{display:none;padding:0 14px 14px;border-top:1px solid var(--border)}
+.sap-card.open .sap-body{display:block}
+.sap-desc{font-size:12px;color:var(--muted);margin:10px 0 8px;line-height:1.5}
+.step-list{counter-reset:s}
+.step-item{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:12px;line-height:1.5}
+.step-num{width:20px;height:20px;border-radius:50%;background:var(--bg4);color:var(--accent);font-family:var(--mono);font-size:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-txt{color:var(--text);flex:1}
+.step-txt .key{font-family:var(--mono);background:var(--bg4);padding:1px 5px;border-radius:4px;font-size:11px;color:var(--accent2)}
+.warn-box{background:rgba(232,93,93,.08);border:1px solid rgba(232,93,93,.2);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--red);line-height:1.5;margin-top:8px}
+.tip-box{background:rgba(78,201,148,.08);border:1px solid rgba(78,201,148,.2);border-radius:8px;padding:8px 11px;font-size:11px;color:var(--green);line-height:1.5;margin-top:8px}
+/* EDITOR */
+.editor-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.editor-wrap h3{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.editor-sub{font-size:11px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+.task-edit-list{margin-bottom:10px}
+.te-row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.te-day{width:80px;padding:6px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:11px;outline:none}
+.te-txt{flex:1;padding:6px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;transition:border-color .15s}
+.te-txt:focus{border-color:rgba(232,180,74,.4)}
+.te-del{width:28px;height:28px;border-radius:6px;background:rgba(232,93,93,.1);border:none;color:var(--red);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn-add{width:100%;padding:9px;background:var(--bg3);border:1px dashed rgba(232,180,74,.3);border-radius:var(--r);color:var(--amber);font-family:var(--font);font-size:12px;cursor:pointer;margin-bottom:10px;transition:all .2s}
+.btn-add:hover{background:rgba(232,180,74,.08)}
+.btn-save{width:100%;padding:11px;background:var(--accent);color:#0f1923;border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-save:hover{background:var(--accent2)}
+.btn-reset{width:100%;padding:9px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:12px;cursor:pointer;margin-top:6px}
+/* MONTH */
+.mo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:400px){.mo-grid{grid-template-columns:1fr}}
+.wk-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px}
+.wk-card h3{font-size:11px;font-weight:500;color:var(--accent);font-family:var(--mono);margin-bottom:9px;letter-spacing:.04em}
+.mi{display:flex;gap:7px;align-items:flex-start;margin-bottom:5px;font-size:12px;line-height:1.4}
 .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
-.month-footer{margin-top:8px;background:var(--bg2);border:1px solid rgba(232,180,74,.2);border-radius:var(--r);padding:12px 14px}
-.month-footer h3{font-size:12px;color:var(--accent);font-family:var(--mono);margin-bottom:8px}
-.month-footer-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-
-/* CARD panel */
-.sectors{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-@media(max-width:420px){.sectors{grid-template-columns:1fr}}
-.sector{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
-.sector-name{font-size:12px;color:var(--text)}
-.sector-pts{font-family:var(--mono);font-size:11px;color:var(--muted)}
-.sector-bar{height:3px;background:var(--bg4);border-radius:2px;margin-top:6px;overflow:hidden}
-.sector-fill{height:100%;border-radius:2px;background:var(--blue)}
-.sector.priority .sector-fill{background:var(--amber)}
-.blocker-list{margin-bottom:12px}
-.blocker{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(232,93,93,.08);border:1px solid rgba(232,93,93,.2);border-radius:var(--r);margin-bottom:6px;font-size:13px;color:var(--red)}
-.blocker-icon{font-size:16px;flex-shrink:0}
-
-/* SETTINGS panel */
-.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
-.setting-label{font-size:14px;color:var(--text)}
-.setting-sub{font-size:12px;color:var(--muted);margin-top:2px}
-.toggle{position:relative;width:44px;height:26px;flex-shrink:0}
+/* SETTINGS */
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border)}
+.s-lbl{font-size:13px}
+.s-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0}
 .toggle input{opacity:0;width:0;height:0}
-.slider{position:absolute;inset:0;background:var(--bg4);border-radius:13px;cursor:pointer;transition:.3s}
-.slider::before{content:'';position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:var(--muted);border-radius:50%;transition:.3s}
+.slider{position:absolute;inset:0;background:var(--bg4);border-radius:12px;cursor:pointer;transition:.25s}
+.slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:var(--muted);border-radius:50%;transition:.25s}
 input:checked+.slider{background:var(--accent)}
 input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
-.notif-status{font-size:13px;padding:10px 14px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);margin-top:12px;color:var(--muted);font-family:var(--mono)}
-.btn-primary{width:100%;padding:13px;background:var(--accent);color:#0f1923;border:none;border-radius:var(--r);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;transition:all .2s}
-.btn-primary:hover{background:var(--accent2)}
-.btn-secondary{width:100%;padding:12px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:13px;cursor:pointer;margin-top:8px;transition:all .2s}
-.btn-secondary:hover{border-color:rgba(255,255,255,.2)}
-
-/* Install banner */
-.install-banner{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid rgba(232,180,74,.3);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
-.install-banner p{font-size:13px;color:var(--text);line-height:1.4}
-.install-banner p span{color:var(--accent);font-weight:500}
-.install-btn{flex-shrink:0;padding:7px 14px;background:var(--accent);color:#0f1923;border:none;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer}
-
-/* Summary bar */
-.summary-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;text-align:center}
-.stat-num{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--accent);line-height:1}
-.stat-lbl{font-size:10px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
-
-/* Toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 18px;font-size:13px;color:var(--text);z-index:999;transition:transform .3s;white-space:nowrap}
+.notif-st{padding:9px 12px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:10px}
+.btn-p{width:100%;padding:12px;background:var(--accent);color:#0f1923;border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;transition:all .2s}
+.btn-s{width:100%;padding:10px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:12px;cursor:pointer;margin-top:6px}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:9px 16px;font-size:12px;color:var(--text);z-index:999;transition:transform .28s;white-space:nowrap;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
-
-/* Scrollbar */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
 <div class="hdr">
   <div class="hdr-logo">
     <div class="hdr-mark">TМ</div>
-    <div>
-      <div class="hdr-title">ТеМАХ РМ</div>
-      <div class="hdr-sub">Кърджали · Раднево</div>
-    </div>
+    <div><div class="hdr-title">ТеМАХ РМ</div><div class="hdr-sub">Кърджали · Раднево</div></div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
+  <div class="hdr-right">
     <div class="hdr-date" id="hdr-date"></div>
-    <button class="notif-btn" id="notif-btn" onclick="toggleNotif()" title="Нотификации">🔔</button>
+    <button class="icon-btn" id="notif-btn" onclick="toggleNotif()" title="Нотификации">🔔</button>
   </div>
 </div>
 
-<!-- NAV -->
 <div class="nav">
   <button class="nav-btn on" onclick="nav('today',this)">Днес</button>
   <button class="nav-btn" onclick="nav('week',this)">Седмица</button>
   <button class="nav-btn" onclick="nav('month',this)">Месец</button>
-  <button class="nav-btn" onclick="nav('card',this)">Контролна карта</button>
-  <button class="nav-btn" onclick="nav('settings',this)">⚙ Настройки</button>
+  <button class="nav-btn" onclick="nav('sap',this)">SAP</button>
+  <button class="nav-btn" onclick="nav('edit',this)">✏ Бюлетин</button>
+  <button class="nav-btn" onclick="nav('settings',this)">⚙</button>
 </div>
 
 <div class="main">
 
-<!-- ===== TODAY ===== -->
+<!-- TODAY -->
 <div class="panel on" id="p-today">
-  <div id="install-banner" class="install-banner" style="display:none">
-    <div>📱</div>
-    <p>Добави на <span>началния екран</span> за бърз достъп и нотификации</p>
-    <button class="install-btn" onclick="installApp()">Инсталирай</button>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div><div style="font-size:19px;font-weight:600" id="today-title"></div><div style="font-size:12px;color:var(--muted);margin-top:1px" id="today-sub"></div></div>
+    <svg width="42" height="42" style="transform:rotate(-90deg);flex-shrink:0"><circle cx="21" cy="21" r="17" fill="none" stroke="var(--bg4)" stroke-width="3"/><circle id="prog-ring" cx="21" cy="21" r="17" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="107" stroke-dashoffset="107" style="transition:stroke-dashoffset .5s"/></svg>
   </div>
-
-  <div class="today-header">
-    <div>
-      <h2 id="today-title">Днес</h2>
-      <div style="font-size:13px;color:var(--muted);margin-top:2px" id="today-sub"></div>
-    </div>
-    <div class="progress-ring-wrap">
-      <svg width="44" height="44" style="transform:rotate(-90deg)">
-        <circle cx="22" cy="22" r="18" fill="none" stroke="var(--bg4)" stroke-width="3"/>
-        <circle id="prog-ring" cx="22" cy="22" r="18" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="113" stroke-dashoffset="113" style="transition:stroke-dashoffset .5s"/>
-      </svg>
-      <span class="pct-label" id="prog-pct">0%</span>
-    </div>
+  <div class="stat-bar">
+    <div class="stat"><div class="stat-n" id="s-tot">0</div><div class="stat-l">Общо</div></div>
+    <div class="stat"><div class="stat-n" id="s-don" style="color:var(--green)">0</div><div class="stat-l">Готово</div></div>
+    <div class="stat"><div class="stat-n" id="s-lft" style="color:var(--red)">0</div><div class="stat-l">Остават</div></div>
   </div>
-
-  <div class="summary-bar">
-    <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Общо</div></div>
-    <div class="stat-card"><div class="stat-num" id="stat-done" style="color:var(--green)">0</div><div class="stat-lbl">Готово</div></div>
-    <div class="stat-card"><div class="stat-num" id="stat-left" style="color:var(--red)">0</div><div class="stat-lbl">Остават</div></div>
-  </div>
-
+  <div class="prog-row"><div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div><span class="prog-pct" id="prog-pct">0%</span></div>
   <div id="task-list"></div>
 </div>
 
-<!-- ===== WEEK ===== -->
+<!-- WEEK -->
 <div class="panel" id="p-week">
-  <div class="section-label" style="margin-top:4px">Модел на работната седмица</div>
-  <div class="week-grid">
-    <div class="day-card" id="dc-1">
-      <div class="day-hd">Понеделник</div>
-      <div class="day-body">
-        <div class="ev ev-r"><strong>Справка минуси</strong>От Даяна Иванова — незакрити движения</div>
-        <div class="ev ev-r"><strong>Колоранти 11:00ч</strong>Снимка до Полина Великова</div>
-        <div class="ev ev-b"><strong>Дистанц.контрол</strong>Минуси + обратни движения</div>
-        <div class="ev ev-a"><strong>Комуникация</strong>Обратна връзка — задачи от бюлетин</div>
-      </div>
-    </div>
-    <div class="day-card" id="dc-2">
-      <div class="day-hd">Вторник</div>
-      <div class="day-body">
-        <div class="ev ev-b"><strong>Онлайн среща</strong>Магазини — задачи от бюлетин</div>
-        <div class="ev ev-a"><strong>Справка М.Павлова</strong>Необработени заявки</div>
-        <div class="ev ev-g"><strong>Посещение</strong>Седм.1: Карта 1/2 · Седм.2: Планограми</div>
-      </div>
-    </div>
-    <div class="day-card" id="dc-3">
-      <div class="day-hd">Сряда</div>
-      <div class="day-body">
-        <div class="ev ev-r"><strong>OneDrive списъци</strong>Стока за връщане (задълж.)</div>
-        <div class="ev ev-r"><strong>Ревизии до 16:00</strong>ZINVCHECK → изпрати</div>
-        <div class="ev ev-a"><strong>Рекламации осв.</strong>Качи в ZINVCOUNT</div>
-      </div>
-    </div>
-    <div class="day-card" id="dc-4">
-      <div class="day-hd">Четвъртък</div>
-      <div class="day-body">
-        <div class="ev ev-g"><strong>Посещение</strong>Зала + склад + промозони</div>
-        <div class="ev ev-b"><strong>Follow-up сряда</strong>Разлики, ревизии изпратени?</div>
-        <div class="ev ev-gray"><strong>Планиране</strong>Подготовка за петъчен анализ</div>
-      </div>
-    </div>
-    <div class="day-card" id="dc-5">
-      <div class="day-hd">Петък</div>
-      <div class="day-body">
-        <div class="ev ev-b"><strong>Камери — анализ</strong>5 точки за всеки обект</div>
-        <div class="ev ev-a"><strong>Справка М.Павлова</strong>2-ра за седмицата</div>
-        <div class="ev ev-b"><strong>Обобщение</strong>Минуси + обратни движения</div>
-        <div class="ev ev-g"><strong>Планиране</strong>Следваща седмица — кой обект?</div>
-      </div>
-    </div>
+  <div class="slbl" style="margin-top:2px">Модел на работната седмица</div>
+  <div class="wk-grid">
+    <div class="dc" id="dc-1"><div class="dc-hd">Понеделник</div><div class="dc-body">
+      <div class="ev ev-r"><strong>Справка минуси</strong>Незакрити движения — от Даяна Иванова</div>
+      <div class="ev ev-r"><strong>Колоранти 11:00ч</strong>Снимка → p.velikova@temax.bg</div>
+      <div class="ev ev-b"><strong>Дистанц.контрол</strong>Минуси + обратни движения 952/954</div>
+      <div class="ev ev-a"><strong>Обратна връзка</strong>По задачи от бюлетина</div>
+    </div></div>
+    <div class="dc" id="dc-2"><div class="dc-hd">Вторник</div><div class="dc-body">
+      <div class="ev ev-b"><strong>Онлайн среща</strong>Магазини — задачи от бюлетин</div>
+      <div class="ev ev-a"><strong>Справка М.Павлова</strong>Необработени заявки</div>
+      <div class="ev ev-g"><strong>Посещение</strong>С.1: Карта 1/2 · С.2: Планограми</div>
+    </div></div>
+    <div class="dc" id="dc-3"><div class="dc-hd">Сряда</div><div class="dc-body">
+      <div class="ev ev-r"><strong>OneDrive списъци</strong>Стока за връщане (задълж.)</div>
+      <div class="ev ev-r"><strong>Ревизии до 16:00</strong>ZINVCHECK → изпрати до 3 имейла</div>
+      <div class="ev ev-a"><strong>Рекламации осв.</strong>ZINVCOUNT — след ревизиите</div>
+      <div class="ev ev-a"><strong>Срок на годност</strong>Обектите качили ли са в SAP?</div>
+    </div></div>
+    <div class="dc" id="dc-4"><div class="dc-hd">Четвъртък</div><div class="dc-body">
+      <div class="ev ev-g"><strong>Посещение обект</strong>Зала, склад, промозони</div>
+      <div class="ev ev-b"><strong>Follow-up сряда</strong>Разлики и ревизии изпратени?</div>
+    </div></div>
+    <div class="dc" id="dc-5"><div class="dc-hd">Петък</div><div class="dc-body">
+      <div class="ev ev-b"><strong>Камери — анализ</strong>5 точки за всеки обект</div>
+      <div class="ev ev-a"><strong>Справка М.Павлова</strong>2-ра за седмицата</div>
+      <div class="ev ev-b"><strong>Обобщение</strong>Минуси + обратни движения</div>
+      <div class="ev ev-g"><strong>Планиране</strong>Следваща седмица</div>
+    </div></div>
   </div>
-
-  <div class="section-label">Посещения на обекти — логика</div>
-  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
-    <div style="font-size:13px;line-height:1.6;color:var(--text)">
-      <div style="margin-bottom:8px">📍 <strong>Кърджали</strong> · 1ч от теб · <span style="color:var(--muted)">Планирай вторник или четвъртък</span></div>
-      <div style="margin-bottom:8px">📍 <strong>Раднево</strong> · 1ч от теб · <span style="color:var(--muted)">Планирай вторник или четвъртък</span></div>
-      <div style="font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:4px">Седм. 1 и 4 → Контролна карта · Седм. 2 → Планограми + случайна ревизия · Редувай обектите — не ходи на едно място два пъти подред</div>
-    </div>
+  <div class="slbl">Посещения — логика</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px;font-size:12px;color:var(--text);line-height:1.7">
+    📍 <strong>Кърджали</strong> · 1ч &nbsp;|&nbsp; 📍 <strong>Раднево</strong> · 1ч<br>
+    <span style="color:var(--muted)">Редувай обектите — не ходи два пъти подред на едно. С.1+С.4 → Контролна карта · С.2 → Планограми + ревизия</span>
   </div>
 </div>
 
-<!-- ===== MONTH ===== -->
+<!-- MONTH -->
 <div class="panel" id="p-month">
-  <div class="section-label" style="margin-top:4px">Месечен ритъм на работа</div>
-  <div class="month-grid">
-    <div class="wk-card">
-      <h3>// СЕДМ. 1 — НА МЯСТО</h3>
+  <div class="slbl" style="margin-top:2px">Месечен ритъм</div>
+  <div class="mo-grid">
+    <div class="wk-card"><h3>// СЕДМ. 1 — НА МЯСТО</h3>
       <div class="mi"><div class="dot" style="background:var(--red)"></div><div>Дневен план на обекта</div></div>
       <div class="mi"><div class="dot" style="background:var(--red)"></div><div>Чек-листи на управителя</div></div>
       <div class="mi"><div class="dot" style="background:var(--red)"></div><div><strong>Контролна карта 1/2</strong></div></div>
@@ -287,49 +234,33 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
-      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Неприета стока &gt;1 ден</div></div>
     </div>
-    <div class="wk-card">
-      <h3>// СЕДМ. 2 — НА МЯСТО</h3>
+    <div class="wk-card"><h3>// СЕДМ. 2 — НА МЯСТО</h3>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Планограми + мостреници</div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Случайна ревизия 1–3 арт.</div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
-      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Неприета стока &gt;1 ден</div></div>
-      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-        <div class="mi"><div class="dot" style="background:var(--muted)"></div><div style="color:var(--muted);font-size:11px">Дистанц.: Минуси, камери, обратни движения</div></div>
-      </div>
     </div>
-    <div class="wk-card">
-      <h3>// СЕДМ. 3 — НА МЯСТО</h3>
+    <div class="wk-card"><h3>// СЕДМ. 3 — НА МЯСТО</h3>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
-      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Неприета стока &gt;1 ден</div></div>
-      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-        <div class="mi"><div class="dot" style="background:var(--muted)"></div><div style="color:var(--muted);font-size:11px">Дистанц.: Минуси, камери, обратни движения</div></div>
-      </div>
+      <div class="mi"><div class="dot" style="background:var(--muted)"></div><div style="color:var(--muted);font-size:11px">Дистанц.: Минуси, камери, движения</div></div>
     </div>
-    <div class="wk-card">
-      <h3>// СЕДМ. 4 — НА МЯСТО</h3>
+    <div class="wk-card"><h3>// СЕДМ. 4 — НА МЯСТО</h3>
       <div class="mi"><div class="dot" style="background:var(--red)"></div><div><strong>Контролна карта 2/2</strong></div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
-      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Неприета стока &gt;1 ден</div></div>
-      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
-        <div class="mi"><div class="dot" style="background:var(--muted)"></div><div style="color:var(--muted);font-size:11px">Дистанц.: Минуси, камери, обратни движения</div></div>
-      </div>
     </div>
   </div>
-
-  <div class="month-footer">
-    <h3>// ФИНАЛНИ МЕСЕЧНИ ЗАДАЧИ</h3>
-    <div class="month-footer-grid">
+  <div class="slbl">Финални месечни задачи</div>
+  <div class="wk-card"><h3>// КРАЙ НА МЕСЕЦА</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
       <div class="mi"><div class="dot" style="background:var(--red)"></div><div>Обобщение 2 карти + архив</div></div>
       <div class="mi"><div class="dot" style="background:var(--red)"></div><div>&gt;15% разлика → план корекция</div></div>
-      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Финало изчистване стока на път</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Стока на път — изчистване</div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Брак и преоценка — потвърди</div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Досиета + тренинг програми</div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Одобри графици + отпуски</div></div>
@@ -341,215 +272,303 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
   </div>
 </div>
 
-<!-- ===== CARD ===== -->
-<div class="panel" id="p-card">
-  <div class="section-label" style="margin-top:4px">Блокиращи критерии — без бонус при дори едно НЕ</div>
-  <div class="blocker-list">
-    <div class="blocker"><div class="blocker-icon">⛔</div><div>Касови продажби — без резултат = без бонус за целия обект</div></div>
-    <div class="blocker"><div class="blocker-icon">⛔</div><div>Всички цели палета сухи смеси — проверка за изтекъл срок</div></div>
-    <div class="blocker"><div class="blocker-icon">⛔</div><div>Всички с униформи и баджове + проверка от камери</div></div>
-    <div class="blocker"><div class="blocker-icon">⛔</div><div>Изрядна документация + пожарогасители в срок</div></div>
+<!-- SAP -->
+<div class="panel" id="p-sap">
+  <input class="sap-search" id="sap-q" placeholder="🔍  Търси транзакция или тема..." oninput="filterSap(this.value)">
+  <div id="sap-list"></div>
+</div>
+
+<!-- BULLETIN EDITOR -->
+<div class="panel" id="p-edit">
+  <div class="editor-wrap">
+    <h3>✏ Задачи от бюлетина</h3>
+    <div class="editor-sub">Добавяй специфичните задачи от текущия бюлетин — те се показват в „Днес" с жълта маркировка и се нулират всяка седмица (неделя в полунощ).</div>
+    <div class="task-edit-list" id="edit-list"></div>
+    <button class="btn-add" onclick="addEditRow()">+ Добави задача</button>
+    <button class="btn-save" onclick="saveBulletin()">💾 Запази задачите</button>
+    <button class="btn-reset" onclick="resetBulletin()">↺ Нулирай за нова седмица</button>
   </div>
 
-  <div class="section-label">17 сектора — точки и приоритет</div>
-  <div class="sectors">
-    <div class="sector priority"><div><div class="sector-name">16. Касова зона и бюра</div><div class="sector-bar"><div class="sector-fill" style="width:100%"></div></div></div><span class="sector-pts">16т ⭐</span></div>
-    <div class="sector priority"><div><div class="sector-name">1. Плочки и ламинат</div><div class="sector-bar"><div class="sector-fill" style="width:87%"></div></div></div><span class="sector-pts">14т ⭐</span></div>
-    <div class="sector priority"><div><div class="sector-name">3. Баня и ВиК</div><div class="sector-bar"><div class="sector-fill" style="width:87%"></div></div></div><span class="sector-pts">14т ⭐</span></div>
-    <div class="sector"><div><div class="sector-name">10. Градински мебели</div><div class="sector-bar"><div class="sector-fill" style="width:75%"></div></div></div><span class="sector-pts">12т</span></div>
-    <div class="sector"><div><div class="sector-name">2. Строителство</div><div class="sector-bar"><div class="sector-fill" style="width:69%"></div></div></div><span class="sector-pts">11т</span></div>
-    <div class="sector"><div><div class="sector-name">5. Подови настилки</div><div class="sector-bar"><div class="sector-fill" style="width:69%"></div></div></div><span class="sector-pts">11т</span></div>
-    <div class="sector"><div><div class="sector-name">7. Бои и облицовки</div><div class="sector-bar"><div class="sector-fill" style="width:69%"></div></div></div><span class="sector-pts">11т</span></div>
-    <div class="sector"><div><div class="sector-name">9. Градина</div><div class="sector-bar"><div class="sector-fill" style="width:63%"></div></div></div><span class="sector-pts">10т</span></div>
-    <div class="sector"><div><div class="sector-name">11. Крепежи и врати</div><div class="sector-bar"><div class="sector-fill" style="width:63%"></div></div></div><span class="sector-pts">10т</span></div>
-    <div class="sector"><div><div class="sector-name">12. Входна зона</div><div class="sector-bar"><div class="sector-fill" style="width:63%"></div></div></div><span class="sector-pts">10т</span></div>
-    <div class="sector"><div><div class="sector-name">17. Осветление</div><div class="sector-bar"><div class="sector-fill" style="width:63%"></div></div></div><span class="sector-pts">10т</span></div>
-    <div class="sector"><div><div class="sector-name">6. Домашни потреби</div><div class="sector-bar"><div class="sector-fill" style="width:56%"></div></div></div><span class="sector-pts">9т</span></div>
-    <div class="sector"><div><div class="sector-name">8. Ел.и градин.машини</div><div class="sector-bar"><div class="sector-fill" style="width:56%"></div></div></div><span class="sector-pts">9т</span></div>
-    <div class="sector"><div><div class="sector-name">13. Вътрешен склад</div><div class="sector-bar"><div class="sector-fill" style="width:56%"></div></div></div><span class="sector-pts">9т</span></div>
-    <div class="sector"><div><div class="sector-name">14. Външен склад</div><div class="sector-bar"><div class="sector-fill" style="width:56%"></div></div></div><span class="sector-pts">9т</span></div>
-    <div class="sector"><div><div class="sector-name">4. Текстил</div><div class="sector-bar"><div class="sector-fill" style="width:50%"></div></div></div><span class="sector-pts">8т</span></div>
-    <div class="sector"><div><div class="sector-name">15. Плац</div><div class="sector-bar"><div class="sector-fill" style="width:31%"></div></div></div><span class="sector-pts">5т</span></div>
-  </div>
-  <div style="margin-top:10px;padding:10px 14px;background:rgba(232,180,74,.08);border:1px solid rgba(232,180,74,.2);border-radius:var(--r);font-size:12px;color:var(--amber)">
-    ⭐ Приоритет: Касова зона + Плочки + Баня = 44/87т. Ако тези три са перфектни, имаш 50% от оценката покрита.
+  <div class="slbl">Типични задачи от бюлетин (примери)</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:12px;line-height:1.7;color:var(--muted)">
+    <div>📅 <strong style="color:var(--text)">Понеделник:</strong> Стока на път (1-во число), Справка л.м. зануляване</div>
+    <div>📅 <strong style="color:var(--text)">Сряда:</strong> Срок на годност — качване в SAP до [дата]</div>
+    <div>📅 <strong style="color:var(--text)">Сряда:</strong> Ревизии групи до 16ч / Тази седмица ревизии няма</div>
+    <div>📅 <strong style="color:var(--text)">Всеки ден:</strong> Краен срок брак и консумативи — [дата]</div>
+    <div>📅 <strong style="color:var(--text)">Понеделник:</strong> Преоценка до Е.Гюрова — задължително</div>
   </div>
 </div>
 
-<!-- ===== SETTINGS ===== -->
+<!-- SETTINGS -->
 <div class="panel" id="p-settings">
-  <div class="section-label" style="margin-top:4px">Нотификации</div>
-
-  <div class="setting-row">
-    <div><div class="setting-label">Push нотификации</div><div class="setting-sub">Напомняния за задачи в браузъра</div></div>
-    <label class="toggle"><input type="checkbox" id="notif-toggle" onchange="toggleNotifSetting(this.checked)"><span class="slider"></span></label>
+  <div class="slbl" style="margin-top:2px">Нотификации</div>
+  <div class="s-row"><div><div class="s-lbl">Push нотификации</div><div class="s-sub">Напомняния в браузъра</div></div>
+    <label class="toggle"><input type="checkbox" id="nt" onchange="toggleNotifSetting(this.checked)"><span class="slider"></span></label></div>
+  <div class="notif-st" id="notif-st">Проверява се...</div>
+  <div class="slbl">Напомняния</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px">
+    <div class="s-row" style="border:none;padding:5px 0"><div><div class="s-lbl" style="font-size:12px">08:00 — Сутрешни задачи</div></div><label class="toggle"><input type="checkbox" id="r1" checked><span class="slider"></span></label></div>
+    <div class="s-row" style="border:none;padding:5px 0"><div><div class="s-lbl" style="font-size:12px">14:00 — Следобедни</div></div><label class="toggle"><input type="checkbox" id="r2" checked><span class="slider"></span></label></div>
+    <div class="s-row" style="border:none;padding:5px 0"><div><div class="s-lbl" style="font-size:12px">17:00 — Краен преглед</div></div><label class="toggle"><input type="checkbox" id="r3" checked><span class="slider"></span></label></div>
   </div>
-
-  <div class="notif-status" id="notif-status">Статус: проверява се...</div>
-
-  <button class="btn-primary" onclick="requestNotif()">🔔 Активирай нотификации</button>
-  <button class="btn-secondary" onclick="testNotif()">Тест нотификация</button>
-
-  <div class="section-label" style="margin-top:20px">Напомняния по часове</div>
-  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
-    <div class="setting-row" style="border:none;padding:6px 0">
-      <div><div class="setting-label" style="font-size:13px">08:00 — Сутрешни задачи</div><div class="setting-sub">Минуси, дневен план</div></div>
-      <label class="toggle"><input type="checkbox" id="r-morning" checked><span class="slider"></span></label>
-    </div>
-    <div class="setting-row" style="border:none;padding:6px 0">
-      <div><div class="setting-label" style="font-size:13px">14:00 — Следобедни задачи</div><div class="setting-sub">Ревизии, стока за връщане</div></div>
-      <label class="toggle"><input type="checkbox" id="r-afternoon" checked><span class="slider"></span></label>
-    </div>
-    <div class="setting-row" style="border:none;padding:6px 0">
-      <div><div class="setting-label" style="font-size:13px">17:00 — Краен преглед</div><div class="setting-sub">Незавършени задачи</div></div>
-      <label class="toggle"><input type="checkbox" id="r-evening" checked><span class="slider"></span></label>
-    </div>
+  <button class="btn-p" onclick="reqNotif()">🔔 Активирай нотификации</button>
+  <button class="btn-s" onclick="testNotif()">Тест нотификация</button>
+  <div class="slbl">Инсталиране</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:12px;line-height:1.7">
+    <div><strong style="color:var(--accent)">Android:</strong> Меню ⋮ → „Добави към началния екран"</div>
+    <div><strong style="color:var(--accent)">iPhone:</strong> Сподели □↑ → „Добави към началния екран"</div>
+    <div><strong style="color:var(--accent)">Компютър:</strong> Иконата ⊕ в адресната лента</div>
   </div>
-
-  <div class="section-label" style="margin-top:20px">Инсталиране</div>
-  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:13px;color:var(--text);line-height:1.6">
-    <div style="margin-bottom:8px"><strong style="color:var(--accent)">Android Chrome:</strong> Меню (⋮) → „Добави към началния екран"</div>
-    <div style="margin-bottom:8px"><strong style="color:var(--accent)">iPhone Safari:</strong> Сподели (□↑) → „Добави към началния екран"</div>
-    <div><strong style="color:var(--accent)">Компютър Chrome:</strong> Иконата ⊕ в адресната лента</div>
-  </div>
-  <button class="btn-secondary" onclick="installApp()">📲 Инсталирай като приложение</button>
 </div>
 
 </div><!-- /main -->
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────────────────────────
-const TASKS = {
-  0: [ // Sunday
-    {id:'sun1',t:'Почивен ден',m:'Планирай следващата седмица',c:'amber',badge:'amber',bl:'Планиране'}
+// ── CONSTANTS ──────────────────────────────────────────────────────
+const DAY = ['Неделя','Понеделник','Вторник','Сряда','Четвъртък','Петък','Събота'];
+const MON = ['Януари','Февруари','Март','Април','Май','Юни','Юли','Август','Септември','Октомври','Ноември','Декември'];
+const C = {r:'var(--red)',a:'var(--amber)',b:'var(--blue)',g:'var(--green)'};
+
+// ── BASE TASKS (permanent, per weekday) ────────────────────────────
+const BASE = {
+  1:[
+    {id:'m1',t:'Справка минуси — незакрити движения',m:'От Даяна Иванова • работи само по актуалните таблици',c:'r',bl:'Критично'},
+    {id:'m2',t:'Снимка колоранти до 11:00ч',m:'p.velikova@temax.bg — всички обекти',c:'r',bl:'Срок 11:00'},
+    {id:'m3',t:'Провери обратни движения (952/954)',m:'Изпълнени ли са до 2 дни след ревизия?',c:'b',bl:'Контрол'},
+    {id:'m4',t:'Обратна връзка по задачи от бюлетина',m:'Задължително — дори „нямаме нищо за подаване"',c:'a',bl:'Комуникация'},
   ],
-  1: [ // Monday
-    {id:'mon1',t:'Справка минуси — незакрити движения',m:'От Даяна Иванова • проверявай всеки обект',c:'red',badge:'red',bl:'Критично'},
-    {id:'mon2',t:'Снимка на колорантите до 11:00ч',m:'До Полина Великова: p.velikova@temax.bg',c:'red',badge:'red',bl:'Срок 11:00'},
-    {id:'mon3',t:'Провери незакрити движения (952/954)',m:'Изпълнени ли са до 2 дни след ревизия?',c:'blue',badge:'blue',bl:'Контрол'},
-    {id:'mon4',t:'Обратна връзка по задачи от бюлетина',m:'Задължителен отговор дори при „нямаме нищо"',c:'amber',badge:'amber',bl:'Комуникация'},
+  2:[
+    {id:'t1',t:'Онлайн среща с магазините',m:'Задачи от бюлетина — проверка за разбиране',c:'b',bl:'Среща'},
+    {id:'t2',t:'Справка М.Павлова — необработени заявки',m:'Реагирай веднага при открити проблеми',c:'a',bl:'Важно'},
+    {id:'t3',t:'Планирай посещение (Кърджали или Раднево)',m:'1ч път — подготви се с данни от камери и минуси',c:'g',bl:'Теренно'},
   ],
-  2: [ // Tuesday
-    {id:'tue1',t:'Онлайн среща с магазините',m:'Задачи от бюлетина — проверка за разбиране',c:'blue',badge:'blue',bl:'Среща'},
-    {id:'tue2',t:'Справка М.Павлова — необработени заявки',m:'Реагирай веднага при открити проблеми',c:'amber',badge:'amber',bl:'Важно'},
-    {id:'tue3',t:'Планирай посещение на обект',m:'Кърджали или Раднево — 1ч път',c:'green',badge:'green',bl:'Теренно'},
+  3:[
+    {id:'w1',t:'OneDrive: Стока за връщане — попълни',m:'Задължително всяка сряда',c:'r',bl:'Срок сряда'},
+    {id:'w2',t:'OneDrive: Стока за изтегляне по разлики',m:'Задължително всяка сряда',c:'r',bl:'Срок сряда'},
+    {id:'w3',t:'Ревизии — качи до 16:00ч (пон-сряда)',m:'ZINVCHECK преди изпращане → l.vasileva / n.tudjarova / a.simeonova @temax.bg',c:'r',bl:'Срок 16:00'},
+    {id:'w4',t:'Рекламации осветление → ZINVCOUNT',m:'След осчетоводяване на ревизиите',c:'a',bl:'Важно'},
+    {id:'w5',t:'Срокове на годност — обектите качили ли са?',m:'Провери в SAP или попитай управителите',c:'a',bl:'Контрол'},
   ],
-  3: [ // Wednesday
-    {id:'wed1',t:'Попълни OneDrive: Стока за връщане',m:'Задължително всяка сряда',c:'red',badge:'red',bl:'Срок сряда'},
-    {id:'wed2',t:'Попълни OneDrive: Стока за изтегляне по разлики',m:'Задължително всяка сряда',c:'red',badge:'red',bl:'Срок сряда'},
-    {id:'wed3',t:'Ревизии — качи до 16:00ч',m:'ZINVCHECK → изпрати до 3 имейла',c:'red',badge:'red',bl:'Срок 16:00'},
-    {id:'wed4',t:'Рекламации осветление — качи в ZINVCOUNT',m:'След осчетоводяване на ревизиите',c:'amber',badge:'amber',bl:'Важно'},
-    {id:'wed5',t:'Срокове на годност — провери качването',m:'Обектите качили ли са в SAP?',c:'amber',badge:'amber',bl:'Контрол'},
+  4:[
+    {id:'th1',t:'Посещение — зала, склад, промозони, обслужване',m:'Проверявай блокиращите критерии първи',c:'g',bl:'Теренно'},
+    {id:'th2',t:'Follow-up от сряда',m:'Разлики и ревизии изпратени ли са от обектите?',c:'b',bl:'Контрол'},
   ],
-  4: [ // Thursday
-    {id:'thu1',t:'Посещение на обект — зала + склад',m:'Промозони, стандарти, обслужване',c:'green',badge:'green',bl:'Теренно'},
-    {id:'thu2',t:'Follow-up от сряда',m:'Разлики и ревизии изпратени ли са от обектите?',c:'blue',badge:'blue',bl:'Контрол'},
+  5:[
+    {id:'f1',t:'Анализ на камери — всеки обект',m:'Опашки, оперативки, групички, анулирани бонове, зони пушене',c:'b',bl:'Контрол'},
+    {id:'f2',t:'Справка М.Павлова — 2-ра за седмицата',m:'Необработени заявки + неизписани документи',c:'a',bl:'Важно'},
+    {id:'f3',t:'Седмично обобщение: минуси + обратни движения',m:'Незатворени въпроси → план за понеделник',c:'b',bl:'Анализ'},
+    {id:'f4',t:'Планиране следваща седмица',m:'Кой обект? Контролна карта? Специфични задачи?',c:'g',bl:'Планиране'},
   ],
-  5: [ // Friday
-    {id:'fri1',t:'Анализ на камери — всеки обект',m:'Опашки, оперативки, групички, анулирани бонове',c:'blue',badge:'blue',bl:'Контрол'},
-    {id:'fri2',t:'Справка М.Павлова — 2-ра за седмицата',m:'Необработени заявки + неизписани документи',c:'amber',badge:'amber',bl:'Важно'},
-    {id:'fri3',t:'Седмично обобщение: минуси + обратни движения',m:'Финален преглед на незатворени въпроси',c:'blue',badge:'blue',bl:'Анализ'},
-    {id:'fri4',t:'Планиране следваща седмица',m:'Кой обект? Какви задачи? Контролна карта?',c:'green',badge:'green',bl:'Планиране'},
-  ],
-  6: [ // Saturday
-    {id:'sat1',t:'Почивен ден',m:'',c:'gray',badge:'',bl:''}
-  ]
 };
 
-const COLORS = {red:'var(--red)',amber:'var(--amber)',blue:'var(--blue)',green:'var(--green)',gray:'var(--muted)'};
-const DAY_BG = {red:'badge-red',amber:'badge-amber',blue:'badge-blue',green:'badge-green',gray:''};
-const DAY_NAMES = ['Неделя','Понеделник','Вторник','Сряда','Четвъртък','Петък','Събота'];
-const MONTH_NAMES = ['Януари','Февруари','Март','Април','Май','Юни','Юли','Август','Септември','Октомври','Ноември','Декември'];
+// ── SAP DATA ───────────────────────────────────────────────────────
+const SAP_DATA = [
+  {code:'MB51',name:'Справка движения',cat:'Справки',
+   desc:'Проверка на всички материални движения по артикул, период и вид движение.',
+   steps:[
+     {t:'Стартирай MB51', d:'Въведи <span class="key">MB51</span> в командното поле и натисни Enter'},
+     {t:'Въведи завод', d:'Поле „Завод" → кода на обекта (напр. <span class="key">1024</span> за Кърджали)'},
+     {t:'Избери период', d:'Дата от / до — обикновено текущия месец'},
+     {t:'Вид движение (по желание)', d:'Остави празно за всички, или въведи конкретно (<span class="key">951</span>, <span class="key">953</span> за минуси)'},
+     {t:'Изпълни', d:'Бутон <span class="key">Изпълни (F8)</span> — зарежда се списъкът'},
+     {t:'Анализирай', d:'Търси незакрити двойки 951↔952 и 953↔954 — сумата им трябва да е нула'},
+   ],
+   tip:'За да видиш само минусите за деня: въведи днешна дата и движения 951 и 953'},
+  {code:'ZINVCOUNT',name:'Инвентаризации / стока за връщане',cat:'Инвентаризации',
+   desc:'Въвеждане на описи за ревизии и стока за връщане към доставчици.',
+   steps:[
+     {t:'Стартирай ZINVCOUNT', d:'Въведи <span class="key">ZINVCOUNT</span> и Enter'},
+     {t:'Въведи магазин и статус', d:'Код на магазина + статус <span class="key">Нов</span> → Изпълни'},
+     {t:'Избери „Нов опис"', d:'Отваря се празен екран за въвеждане'},
+     {t:'Попълни референция', d:'Задължително поле — пиши напр. <span class="key">Връщане към доставчик</span> (макс. 15 знака)'},
+     {t:'Въведи артикулите', d:'SAP код или сканиран баркод → Enter → въведи количество → F5 за запис'},
+     {t:'Финализирай', d:'F2 за завършване на описа — системата потвърждава с номер'},
+   ],
+   warn:'НЕ качвай стока за връщане и ревизия за осчетоводяване едновременно! Стоката за връщане — след 16ч, когато ревизиите са осчетоводени.'},
+  {code:'ZINVCHECK',name:'Проверка преди осчетоводяване',cat:'Инвентаризации',
+   desc:'Задължителна проверка на качен опис преди да изпратиш мейл за осчетоводяване.',
+   steps:[
+     {t:'Стартирай ZINVCHECK', d:'Въведи <span class="key">ZINVCHECK</span> и Enter'},
+     {t:'Въведи магазин', d:'Кода на обекта → Изпълни'},
+     {t:'Намери описа', d:'Търси по референция или номер на опис'},
+     {t:'Провери отклоненията', d:'Артикули с отклонение 0.1 или по-малко (напр. 0.05) — НЕ се качват, сигнализирай М.Павлова'},
+     {t:'Коригирай ако трябва', d:'При грешно качени количества → редактирай или анулирай реда (зелена колона с чекче)'},
+     {t:'Изпрати мейл за осчетоводяване', d:'Само след успешна проверка → до l.vasileva / n.tudjarova / a.simeonova @temax.bg'},
+   ],
+   warn:'Отговорността за грешно качени количества остава в магазина!'},
+  {code:'MIGO',name:'Материални движения',cat:'Движения',
+   desc:'Основна транзакция за всички материални движения — брак, кражби, консумативи, минуси.',
+   steps:[
+     {t:'Стартирай MIGO', d:'Въведи <span class="key">MIGO</span> и Enter'},
+     {t:'Избери действие и референция', d:'<span class="key">A07</span> – изписване на стоки | <span class="key">R10</span> – други | <span class="key">A01</span> – получаване (за 951/953)'},
+     {t:'Избери вид движение', d:'<span class="key">551</span> брак | <span class="key">963</span> кражба | <span class="key">901/903/905</span> консумативи | <span class="key">951/952/953/954</span> минуси'},
+     {t:'Въведи заглавен текст', d:'„Текст ЗаглДокум" — напр. <span class="key">Кражба м.Юни</span> или <span class="key">ВЪТРЕШНИ НУЖДИ</span>'},
+     {t:'Добави артикулите', d:'SAP код → количество → завод → склад (винаги <span class="key">1000</span>) → текст за позицията'},
+     {t:'Провери (светофар)', d:'Бутон за проверка → зелен светофар на всеки ред = OK'},
+     {t:'Осчетовади', d:'Бутон „Осчетоводяване" → системата генерира документ с номер'},
+   ],
+   warn:'За 551 (брак) — вече НЕ се въвежда разходен център! При грешка „разходен център" — SAP ще покаже съобщение.',
+   tip:'За минуси от 22:53ч — задължително смени датата на документа на предния ден!'},
+  {code:'VL06I',name:'Входящи доставки',cat:'Прием',
+   desc:'Списък с всички входящи доставки за обекта — от доставчици и трансфери.',
+   steps:[
+     {t:'Стартирай VL06I', d:'Въведи <span class="key">VL06I</span> и Enter'},
+     {t:'Натисни „За постъпление"', d:'Зарежда само необработените доставки'},
+     {t:'Натисни „Всички селекции"', d:'За да филтрираш по конкретен обект'},
+     {t:'Въведи пункт за експедиция', d:'Кода на твоя магазин → остави датата празна'},
+     {t:'Изпълни', d:'Зарежда се списъкът — статус A=необработена, B=частична, C=приключена'},
+     {t:'Провери стари документи', d:'Документи статус A и B от минали дати → трябва да се коригират до статус C'},
+   ],
+   warn:'Всички документи трябва да бъдат статус C. Стари A и B документи влизат в седмична справка към снабдителите.'},
+  {code:'ZGRPOST',name:'Прием с мобилно устройство',cat:'Прием',
+   desc:'Потвърждаване на сканиран прием от мобилното устройство в SAP.',
+   steps:[
+     {t:'Намери номера на доставката', d:'От VL06I или стоковата разписка (започва с 180...)'},
+     {t:'Сканирай на мобилното', d:'SAP Net → Скан Вход Доставка → въведи номера → сканирай артикулите с F5'},
+     {t:'Стартирай ZGRPOST', d:'Въведи <span class="key">ZGRPOST</span> в SAP на компютъра'},
+     {t:'Въведи номера на доставката', d:'→ Изпълни → зарежда се цялото сканирано'},
+     {t:'Провери', d:'Сравни сканираните количества с документа на доставчика'},
+     {t:'POST', d:'Бутон POST → системата генерира протокол за приета стока (ППП)'},
+     {t:'Отпечатай протокола', d:'MB90 → въведи номера → Процес → Отпечатване сега → Печат'},
+   ],
+   tip:'Можеш да отвориш произволен стар протокол в MIGO/показване предварително — избягваш грешката с прозорец при ZGRPOST.'},
+  {code:'ZGIPOST',name:'Потвърждаване на изписване',cat:'Изписване',
+   desc:'Финално потвърждение на сканирано изписване и извеждане от наличността.',
+   steps:[
+     {t:'Стартирай ZGIPOST', d:'Въведи <span class="key">ZGIPOST</span> и Enter'},
+     {t:'Въведи номера на изходящата доставка', d:'→ Изпълни'},
+     {t:'Провери данните', d:'Сканирани количества vs. документ — могат да се коригират в „Целево Количество" + Enter'},
+     {t:'POST', d:'Бутон POST → стоките се изписват → системата генерира материален документ'},
+   ],
+   warn:'Не се позволява частично изписване! Ако потвърдиш по-малко — системата коригира автоматично целия документопоток.'},
+  {code:'VL06O',name:'Изходящи доставки',cat:'Изписване',
+   desc:'Списък с изходящи доставки — трансфери и връщания към доставчици.',
+   steps:[
+     {t:'Стартирай VL06O', d:'Въведи <span class="key">VL06O</span> и Enter'},
+     {t:'Избери вид списък', d:'„Списък изходящи" за всички | „За отпускане" само за чакащите'},
+     {t:'Въведи пункт за експедиция', d:'Кода на обекта → остави датата празна'},
+     {t:'Изпълни', d:'Виждаш номерата и получателите'},
+     {t:'Аспект на позиция', d:'За подробен списък по артикули'},
+   ]},
+  {code:'ZSTR',name:'Заявка за трансфер',cat:'Трансфери',
+   desc:'Генериране на заявка за трансфер на стока между обекти.',
+   steps:[
+     {t:'Стартирай ZSTR', d:'Въведи <span class="key">ZSTR</span> и Enter'},
+     {t:'Избери изпращащ и получаващ обект', d:''},
+     {t:'Въведи тип заявка', d:'<span class="key">1</span> = клиентска заявка | <span class="key">4</span> = корекция трансфер (за разлики!)'},
+     {t:'Попълни артикулите и количествата', d:''},
+     {t:'Генерирай', d:'Системата създава заявката — изпращачът я вижда в ZSTO'},
+   ],
+   warn:'Всички заявки по разлики при трансфери задължително с тип 4 — корекция трансфер!'},
+  {code:'ZSTO',name:'Обработка на заявки за трансфер',cat:'Трансфери',
+   desc:'Обработка на постъпили заявки от други обекти — от изпращащия обект.',
+   steps:[
+     {t:'Стартирай ZSTO', d:'Въведи <span class="key">ZSTO</span> и Enter — виждат се необработените заявки'},
+     {t:'Селектирай редовете', d:'Избери поне един ред от заявката'},
+     {t:'Натисни Process', d:'Системата създава поръчка за трансфер и изходяща доставка + генерира Складова разписка'},
+     {t:'Събери стоката', d:'По Складовата разписка се събира физически стоката'},
+     {t:'Изпиши с мобилното', d:'Стоките с баркод ЗАДЪЛЖИТЕЛНО се изписват с мобилното устройство'},
+   ],
+   tip:'Стоката на палет/кашон трябва да е придружена с документ: „От ТеМАХ [от] за ТеМАХ [до]" + номер на СР'},
+  {code:'ZDELIV',name:'Намиране на ВД по стокова разписка',cat:'Прием',
+   desc:'При трансфер — намиране на входящата доставка по номера на стоковата разписка.',
+   steps:[
+     {t:'Стартирай ZDELIV', d:'Въведи <span class="key">ZDELIV</span> и Enter'},
+     {t:'Въведи получател', d:'На множествен избор — въведи и двата склада на обекта'},
+     {t:'Изпълни', d:'Зарежда се списък с доставките'},
+     {t:'Намери по номер Изходяща доставка', d:'Номерът от стоковата разписка = номерът на Изходящата доставка → виждаш номера на Входящата'},
+   ]},
+  {code:'ZSTOCK / ZSTR (поръчки)',name:'Клиентска поръчка — заявка',cat:'Клиентски поръчки',
+   desc:'Генериране на клиентска заявка към доставчик или трансфер от друг обект.',
+   steps:[
+     {t:'Попълни бланка по образец', d:'Данни на клиента, артикул, количество, капаро/плащане'},
+     {t:'Маркирай на каса', d:'За неналична стока: арт. 94549 с ДДС → дай оригинал на клиента, разпечатай дубликат'},
+     {t:'Осчетовади с 951', d:'MIGO → A01 → R10 → движение <span class="key">951</span> → въведи артикула'},
+     {t:'Генерирай заявка', d:'ZSTOCK за заявка към доставчик | ZSTR за трансфер от магазин (тип 1 = клиентска)'},
+     {t:'При доставката', d:'MIGO → движение <span class="key">952</span> → изпиши заприходеното количество'},
+   ],
+   warn:'Артикули осчетоводени с 951 НЕ се ревизират! Сумата 951+952 винаги трябва да е нула (проверка в MB51).'},
+];
 
-// ─── STATE ───────────────────────────────────────────────────────────────────
+// ── STATE ──────────────────────────────────────────────────────────
 let done = JSON.parse(localStorage.getItem('tm-done') || '{}');
-let notifEnabled = false;
+let bulletin = JSON.parse(localStorage.getItem('tm-bulletin') || '[]');
 let deferredPrompt = null;
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
+// ── INIT ───────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  renderToday();
   updateHeader();
-  highlightTodayCol();
-  checkNotifStatus();
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-  }
+  renderToday();
+  renderSap();
+  renderEditList();
+  highlightToday();
+  checkNotif();
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+  scheduleReminders();
 });
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
 
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('install-banner').style.display = 'flex';
-});
-
-// ─── HEADER ──────────────────────────────────────────────────────────────────
 function updateHeader() {
-  const now = new Date();
-  const el = document.getElementById('hdr-date');
-  el.innerHTML = DAY_NAMES[now.getDay()] + '<br>' + now.getDate() + ' ' + MONTH_NAMES[now.getMonth()];
+  const n = new Date();
+  document.getElementById('hdr-date').innerHTML = DAY[n.getDay()]+'<br>'+n.getDate()+' '+MON[n.getMonth()];
 }
-
-function highlightTodayCol() {
+function highlightToday() {
   const d = new Date().getDay();
-  const map = {1:'dc-1',2:'dc-2',3:'dc-3',4:'dc-4',5:'dc-5'};
-  if (map[d]) document.getElementById(map[d])?.classList.add('today-col');
+  const m = {1:'dc-1',2:'dc-2',3:'dc-3',4:'dc-4',5:'dc-5'};
+  if (m[d]) document.getElementById(m[d])?.classList.add('today');
 }
 
-// ─── NAV ─────────────────────────────────────────────────────────────────────
+// ── NAV ────────────────────────────────────────────────────────────
 function nav(id, btn) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('p-' + id).classList.add('on');
+  document.getElementById('p-'+id).classList.add('on');
 }
 
-// ─── TODAY ───────────────────────────────────────────────────────────────────
+// ── TODAY ──────────────────────────────────────────────────────────
 function renderToday() {
   const dow = new Date().getDay();
-  const tasks = TASKS[dow] || [];
-  const list = document.getElementById('task-list');
+  const base = BASE[dow] || [];
+  // Add bulletin tasks for today's day
+  const dayName = DAY[dow];
+  const bTasks = bulletin.filter(b => b.day === dayName || b.day === 'Всеки ден').map((b,i) => ({
+    id:'b'+i, t:b.text, m:'от бюлетина', c:'a', bl:'Бюлетин', bulletin:true
+  }));
+  const tasks = [...base, ...bTasks];
 
-  // Group by badge label
+  document.getElementById('today-title').textContent = dayName;
+  const n = new Date();
+  document.getElementById('today-sub').textContent = n.getDate()+' '+MON[n.getMonth()]+' '+n.getFullYear();
+
+  if (!tasks.length || dow===0 || dow===6) {
+    document.getElementById('task-list').innerHTML = '<div style="text-align:center;padding:36px 0;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">🏖</div><div>Почивен ден — зарежда се утре!</div></div>';
+    updateStats([]);
+    return;
+  }
+
+  // Group by bl
   const groups = {};
-  tasks.forEach(t => {
-    const g = t.bl || 'Задачи';
-    if (!groups[g]) groups[g] = [];
-    groups[g].push(t);
-  });
-
+  tasks.forEach(t => { const g=t.bl||'Задачи'; if(!groups[g]) groups[g]=[]; groups[g].push(t); });
   let html = '';
-  for (const [grp, items] of Object.entries(groups)) {
-    html += `<div class="section-label">${grp}</div>`;
+  for (const [g, items] of Object.entries(groups)) {
+    html += `<div class="slbl">${g}</div>`;
     items.forEach(t => {
       const isDone = !!done[t.id];
-      const col = COLORS[t.c] || 'var(--border)';
-      const badgeCls = DAY_BG[t.badge] || '';
-      html += `<div class="task ${isDone?'done':''}" style="--task-color:${col}" onclick="toggleTask('${t.id}')">
-        <div class="task-check">${isDone?'✓':''}</div>
-        <div class="task-body">
-          <div class="task-title">${t.t}</div>
-          ${t.m ? `<div class="task-meta">${t.m}</div>` : ''}
-          ${t.bl && badgeCls ? `<span class="task-badge ${badgeCls}">${t.bl}</span>` : ''}
-        </div>
-      </div>`;
+      const bc = {r:'bdg-r',a:'bdg-a',b:'bdg-b',g:'bdg-g'}[t.c]||'';
+      const bCls = t.bulletin ? ' bulletin' : '';
+      html += `<div class="task${bCls}${isDone?' done':''}" style="--tc:${C[t.c]||'var(--border)'}" onclick="toggleTask('${t.id}')">
+        <div class="t-chk">${isDone?'✓':''}</div>
+        <div class="t-body">
+          <div class="t-title">${t.t}</div>
+          ${t.m?`<div class="t-meta">${t.m}</div>`:''}
+          ${t.bl&&bc?`<span class="bdg ${bc}">${t.bl}</span>`:''}
+        </div></div>`;
     });
   }
-
-  if (tasks.length === 0 || tasks[0].id.startsWith('sun') || tasks[0].id.startsWith('sat')) {
-    html = '<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">🏖</div><div style="font-size:15px">Почивен ден</div><div style="font-size:13px;margin-top:4px">Следващата седмица те чака!</div></div>';
-  }
-
-  list.innerHTML = html;
-
-  // Update today title
-  document.getElementById('today-title').textContent = DAY_NAMES[dow];
-  const now = new Date();
-  document.getElementById('today-sub').textContent = now.getDate() + ' ' + MONTH_NAMES[now.getMonth()] + ' ' + now.getFullYear();
-
-  updateProgress(tasks);
+  document.getElementById('task-list').innerHTML = html;
+  updateStats(tasks);
 }
 
 function toggleTask(id) {
@@ -557,149 +576,176 @@ function toggleTask(id) {
   if (!done[id]) delete done[id];
   localStorage.setItem('tm-done', JSON.stringify(done));
   renderToday();
-  toast(done[id] === undefined ? '↩ Отменено' : '✓ Отбелязано');
+  toast(Object.keys(done).includes(id)?'—':'✓ Отбелязано');
 }
 
-function updateProgress(tasks) {
-  if (!tasks || !tasks.length || tasks[0].id.startsWith('sun') || tasks[0].id.startsWith('sat')) {
-    document.getElementById('prog-ring').style.strokeDashoffset = 113;
-    document.getElementById('prog-pct').textContent = '—';
-    document.getElementById('stat-total').textContent = 0;
-    document.getElementById('stat-done').textContent = 0;
-    document.getElementById('stat-left').textContent = 0;
+function updateStats(tasks) {
+  if (!tasks.length) {
+    ['s-tot','s-don','s-lft'].forEach(id => document.getElementById(id).textContent='0');
+    document.getElementById('prog-ring').style.strokeDashoffset=107;
+    document.getElementById('prog-fill').style.width='0%';
+    document.getElementById('prog-pct').textContent='—';
     return;
   }
-  const total = tasks.length;
-  const doneCount = tasks.filter(t => done[t.id]).length;
-  const pct = total ? Math.round(doneCount / total * 100) : 0;
-  const offset = 113 - (113 * pct / 100);
-  document.getElementById('prog-ring').style.strokeDashoffset = offset;
-  document.getElementById('prog-pct').textContent = pct + '%';
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-done').textContent = doneCount;
-  document.getElementById('stat-left').textContent = total - doneCount;
+  const total=tasks.length, doneN=tasks.filter(t=>done[t.id]).length, pct=Math.round(doneN/total*100);
+  document.getElementById('s-tot').textContent=total;
+  document.getElementById('s-don').textContent=doneN;
+  document.getElementById('s-lft').textContent=total-doneN;
+  document.getElementById('prog-ring').style.strokeDashoffset=107-(107*pct/100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
 }
 
-// ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
-async function checkNotifStatus() {
-  const el = document.getElementById('notif-status');
-  const btn = document.getElementById('notif-btn');
-  if (!('Notification' in window)) {
-    el.textContent = 'Статус: браузърът не поддържа нотификации';
-    return;
-  }
-  if (Notification.permission === 'granted') {
-    el.textContent = 'Статус: ✓ Нотификациите са активни';
-    el.style.color = 'var(--green)';
-    document.getElementById('notif-toggle').checked = true;
-    btn.classList.add('on');
-    notifEnabled = true;
-    scheduleReminders();
-  } else if (Notification.permission === 'denied') {
-    el.textContent = 'Статус: ✗ Нотификациите са блокирани в браузъра';
-    el.style.color = 'var(--red)';
-  } else {
-    el.textContent = 'Статус: Не са активирани — натисни бутона';
-  }
-}
-
-async function requestNotif() {
-  if (!('Notification' in window)) {
-    toast('Браузърът не поддържа нотификации');
-    return;
-  }
-  const perm = await Notification.requestPermission();
-  if (perm === 'granted') {
-    document.getElementById('notif-btn').classList.add('on');
-    notifEnabled = true;
-    scheduleReminders();
-    toast('✓ Нотификациите са активирани');
-    checkNotifStatus();
-    // Welcome notif
-    setTimeout(() => {
-      new Notification('ТеМАХ РМ ✓', {body: 'Нотификациите са активни. Ще те напомним за задачите!', icon: ''});
-    }, 500);
-  } else {
-    toast('Нотификациите бяха отказани');
-  }
-}
-
-function toggleNotif() {
-  if (Notification.permission !== 'granted') {
-    requestNotif();
-  } else {
-    nav('settings', document.querySelectorAll('.nav-btn')[4]);
-  }
-}
-
-function toggleNotifSetting(on) {
-  if (on && Notification.permission !== 'granted') {
-    requestNotif();
-  }
-}
-
-function testNotif() {
-  if (Notification.permission !== 'granted') {
-    toast('Първо активирай нотификациите');
-    return;
-  }
-  const dow = new Date().getDay();
-  const tasks = (TASKS[dow] || []).filter(t => !done[t.id]);
-  const msg = tasks.length
-    ? `Имаш ${tasks.length} незавършени задачи за днес`
-    : 'Всички задачи за днес са изпълнени! 🎉';
-  new Notification('ТеМАХ РМ — ' + DAY_NAMES[dow], {body: msg, tag: 'temax-test'});
-}
-
-function scheduleReminders() {
-  // Check every minute if it's time for a reminder
-  setInterval(() => {
-    const now = new Date();
-    const h = now.getHours(), m = now.getMinutes();
-    const dow = now.getDay();
-    if (m !== 0) return; // Only on the hour
-    const tasks = (TASKS[dow] || []).filter(t => !done[t.id]);
-    if (!tasks.length) return;
-    const reminders = [];
-    if (h === 8 && document.getElementById('r-morning')?.checked) reminders.push('Сутрешни задачи');
-    if (h === 14 && document.getElementById('r-afternoon')?.checked) reminders.push('Следобедни задачи');
-    if (h === 17 && document.getElementById('r-evening')?.checked) reminders.push('Краен преглед на деня');
-    reminders.forEach(r => {
-      new Notification('ТеМАХ РМ — ' + r, {
-        body: `${tasks.length} незавършени задачи за ${DAY_NAMES[dow]}`,
-        tag: 'temax-' + h
+// ── SAP ────────────────────────────────────────────────────────────
+function renderSap(filter='') {
+  const fl = filter.toLowerCase();
+  const filtered = SAP_DATA.filter(s =>
+    !fl || s.code.toLowerCase().includes(fl) || s.name.toLowerCase().includes(fl) ||
+    s.desc.toLowerCase().includes(fl) || s.cat.toLowerCase().includes(fl)
+  );
+  // Group by cat
+  const cats = {};
+  filtered.forEach(s => { if(!cats[s.cat]) cats[s.cat]=[]; cats[s.cat].push(s); });
+  let html = '';
+  for (const [cat, items] of Object.entries(cats)) {
+    html += `<div class="slbl">${cat}</div>`;
+    items.forEach(s => {
+      const id = 'sc-'+s.code.replace(/[^a-z0-9]/gi,'');
+      html += `<div class="sap-card" id="${id}">
+        <div class="sap-hd" onclick="toggleSap('${id}')">
+          <div class="sap-tx"><span class="sap-code">${s.code}</span><span class="sap-name">${s.name}</span></div>
+          <span class="sap-arr">▶</span>
+        </div>
+        <div class="sap-body">
+          <div class="sap-desc">${s.desc}</div>
+          <div class="step-list">`;
+      s.steps.forEach((st,i) => {
+        html += `<div class="step-item"><div class="step-num">${i+1}</div><div class="step-txt"><strong>${st.t}</strong>${st.d?'<br>'+st.d:''}</div></div>`;
       });
+      html += `</div>`;
+      if (s.warn) html += `<div class="warn-box">⚠ ${s.warn}</div>`;
+      if (s.tip) html += `<div class="tip-box">💡 ${s.tip}</div>`;
+      html += `</div></div>`;
     });
+  }
+  if (!html) html = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">Няма резултати</div>';
+  document.getElementById('sap-list').innerHTML = html;
+}
+function toggleSap(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+function filterSap(v) { renderSap(v); }
+
+// ── BULLETIN EDITOR ────────────────────────────────────────────────
+function renderEditList() {
+  const el = document.getElementById('edit-list');
+  if (!bulletin.length) { el.innerHTML = '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Няма добавени задачи за тази седмица.</div>'; return; }
+  el.innerHTML = bulletin.map((b,i) => `
+    <div class="te-row">
+      <select class="te-day" onchange="bulletin[${i}].day=this.value">
+        ${DAY.map(d=>`<option value="${d}"${b.day===d?' selected':''}>${d}</option>`).join('')}
+        <option value="Всеки ден"${'Всеки ден'===b.day?' selected':''}>Всеки ден</option>
+      </select>
+      <input class="te-txt" value="${b.text}" oninput="bulletin[${i}].text=this.value" placeholder="Задача от бюлетина...">
+      <button class="te-del" onclick="delBulletin(${i})">✕</button>
+    </div>`).join('');
+}
+function addEditRow() {
+  const dow = new Date().getDay();
+  bulletin.push({day: DAY[dow]||'Понеделник', text:''});
+  renderEditList();
+}
+function delBulletin(i) {
+  bulletin.splice(i,1);
+  renderEditList();
+}
+function saveBulletin() {
+  bulletin = bulletin.filter(b => b.text.trim());
+  localStorage.setItem('tm-bulletin', JSON.stringify(bulletin));
+  renderEditList();
+  renderToday();
+  toast('✓ Задачите са запазени');
+}
+function resetBulletin() {
+  if (!confirm('Изтриваш всички задачи от бюлетина?')) return;
+  bulletin = [];
+  localStorage.setItem('tm-bulletin','[]');
+  renderEditList();
+  renderToday();
+  toast('↺ Нулирано');
+}
+
+// ── NOTIFICATIONS ──────────────────────────────────────────────────
+function checkNotif() {
+  const el = document.getElementById('notif-st');
+  const btn = document.getElementById('notif-btn');
+  if (!('Notification' in window)) { el.textContent='Статус: не се поддържа от браузъра'; return; }
+  if (Notification.permission==='granted') {
+    el.textContent='✓ Нотификациите са активни'; el.style.color='var(--green)';
+    document.getElementById('nt').checked=true; btn.classList.add('on');
+  } else if (Notification.permission==='denied') {
+    el.textContent='✗ Блокирани в браузъра — провери настройките'; el.style.color='var(--red)';
+  } else {
+    el.textContent='Не са активирани — натисни бутона по-долу';
+  }
+}
+async function reqNotif() {
+  if (!('Notification' in window)) return toast('Браузърът не поддържа нотификации');
+  const p = await Notification.requestPermission();
+  if (p==='granted') {
+    document.getElementById('notif-btn').classList.add('on');
+    toast('✓ Нотификациите са активирани');
+    checkNotif();
+    setTimeout(()=> new Notification('ТеМАХ РМ ✓',{body:'Готово! Ще получаваш напомняния за задачите.'}), 400);
+  } else toast('Нотификациите бяха отказани');
+}
+function toggleNotif() {
+  if (Notification.permission!=='granted') reqNotif();
+  else nav('settings', document.querySelectorAll('.nav-btn')[5]);
+}
+function toggleNotifSetting(on) { if (on && Notification.permission!=='granted') reqNotif(); }
+function testNotif() {
+  if (Notification.permission!=='granted') return toast('Първо активирай нотификациите');
+  const dow=new Date().getDay();
+  const tasks=(BASE[dow]||[]).filter(t=>!done[t.id]);
+  const bTasks=bulletin.filter(b=>b.day===DAY[dow]||b.day==='Всеки ден');
+  const total=tasks.length+bTasks.length;
+  new Notification('ТеМАХ РМ — '+DAY[dow], {
+    body: total ? `${total} незавършени задачи за днес` : '🎉 Всички задачи за днес са изпълнени!',
+    tag:'temax-test'
+  });
+}
+function scheduleReminders() {
+  if (Notification.permission!=='granted') return;
+  setInterval(() => {
+    const n=new Date(), h=n.getHours(), m=n.getMinutes(), dow=n.getDay();
+    if (m!==0) return;
+    const tasks=[...(BASE[dow]||[]),...bulletin.filter(b=>b.day===DAY[dow]||b.day==='Всеки ден')]
+      .filter(t=>!done[t.id]);
+    if (!tasks.length) return;
+    const labels={8:'Сутрешни задачи',14:'Следобедни задачи',17:'Краен преглед'};
+    const ids={8:'r1',14:'r2',17:'r3'};
+    if (labels[h] && document.getElementById(ids[h])?.checked) {
+      new Notification('ТеМАХ РМ — '+labels[h], {body:`${tasks.length} незавършени за ${DAY[dow]}`, tag:'temax-'+h});
+    }
   }, 60000);
 }
 
-// ─── INSTALL ─────────────────────────────────────────────────────────────────
-async function installApp() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') toast('✓ Приложението е инсталирано');
-    deferredPrompt = null;
-    document.getElementById('install-banner').style.display = 'none';
-  } else {
-    toast('Виж инструкциите за инсталиране по-горе');
-  }
-}
-
-// ─── TOAST ───────────────────────────────────────────────────────────────────
+// ── TOAST ──────────────────────────────────────────────────────────
 function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2200);
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2000);
 }
 
-// Auto-reset done tasks at midnight
-setInterval(() => {
-  const now = new Date();
-  if (now.getHours() === 0 && now.getMinutes() === 0) {
-    done = {};
-    localStorage.setItem('tm-done', '{}');
+// Auto-reset at midnight
+setInterval(()=>{
+  const n=new Date();
+  if (n.getHours()===0&&n.getMinutes()===0) {
+    done={};
+    localStorage.setItem('tm-done','{}');
+    // Reset bulletin on Sunday midnight
+    if (n.getDay()===0) { bulletin=[]; localStorage.setItem('tm-bulletin','[]'); }
     renderToday();
   }
 }, 60000);
