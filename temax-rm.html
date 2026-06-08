@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#0f1923">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ТеМАХ РМ">
+<title>ТеМАХ — Регионален Мениджър</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1923;
+  --bg2: #16212e;
+  --bg3: #1d2d3e;
+  --bg4: #243549;
+  --accent: #e8b44a;
+  --accent2: #f0c96a;
+  --text: #e8edf2;
+  --muted: #7a909f;
+  --border: rgba(255,255,255,0.07);
+  --red: #e85d5d;
+  --green: #4ec994;
+  --blue: #5b9bd5;
+  --amber: #e8b44a;
+  --r: 12px;
+  --font: 'Outfit', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:100;background:rgba(15,25,35,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.hdr-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:500;font-size:13px;color:#0f1923;letter-spacing:-.5px}
+.hdr-title{font-size:15px;font-weight:500;color:var(--text)}
+.hdr-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.hdr-date{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+.notif-btn{width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .2s}
+.notif-btn.on{background:var(--accent);color:#0f1923;border-color:var(--accent)}
+
+/* NAV */
+.nav{display:flex;gap:4px;padding:12px 16px 0;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.nav-btn.on{background:var(--accent);color:#0f1923;border-color:var(--accent);font-weight:500}
+
+/* MAIN */
+.main{padding:16px;max-width:680px;margin:0 auto}
+.panel{display:none}.panel.on{display:block}
+
+/* TODAY panel */
+.today-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.today-header h2{font-size:20px;font-weight:600}
+.progress-ring-wrap{display:flex;align-items:center;gap:8px}
+.pct-label{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.section-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px}
+
+/* TASK CARD */
+.task{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.task::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--task-color,var(--border));border-radius:3px 0 0 3px;transition:background .2s}
+.task:hover{border-color:rgba(255,255,255,.15);transform:translateX(2px)}
+.task.done{opacity:.4}
+.task.done .task-title{text-decoration:line-through}
+.task-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--muted);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:12px}
+.task.done .task-check{background:var(--green);border-color:var(--green);color:#0f1923}
+.task-body{flex:1;min-width:0}
+.task-title{font-size:14px;font-weight:400;line-height:1.4;color:var(--text)}
+.task-meta{font-size:11px;color:var(--muted);margin-top:3px;font-family:var(--mono)}
+.task-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;margin-top:4px;font-family:var(--mono)}
+.badge-red{background:rgba(232,93,93,.15);color:var(--red)}
+.badge-amber{background:rgba(232,180,74,.15);color:var(--amber)}
+.badge-blue{background:rgba(91,155,213,.15);color:var(--blue)}
+.badge-green{background:rgba(78,201,148,.15);color:var(--green)}
+
+/* WEEK panel */
+.week-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:16px}
+@media(max-width:560px){.week-grid{grid-template-columns:1fr 1fr}}
+.day-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.day-card.today-col{border-color:rgba(232,180,74,.4)}
+.day-hd{padding:8px 10px;font-size:11px;font-weight:500;border-bottom:1px solid var(--border);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.day-card.today-col .day-hd{color:var(--accent)}
+.day-body{padding:8px}
+.ev{padding:5px 7px;border-radius:6px;font-size:11px;line-height:1.35;margin-bottom:4px}
+.ev strong{display:block;font-weight:500;margin-bottom:1px}
+.ev-r{background:rgba(232,93,93,.12);color:var(--red)}
+.ev-a{background:rgba(232,180,74,.12);color:var(--amber)}
+.ev-b{background:rgba(91,155,213,.12);color:var(--blue)}
+.ev-g{background:rgba(78,201,148,.12);color:var(--green)}
+.ev-gray{background:rgba(255,255,255,.04);color:var(--muted)}
+
+/* MONTH panel */
+.month-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:420px){.month-grid{grid-template-columns:1fr}}
+.wk-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.wk-card h3{font-size:12px;font-weight:500;color:var(--accent);font-family:var(--mono);margin-bottom:10px;letter-spacing:.04em}
+.mi{display:flex;gap:8px;align-items:flex-start;margin-bottom:5px;font-size:12px;color:var(--text);line-height:1.4}
+.dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.month-footer{margin-top:8px;background:var(--bg2);border:1px solid rgba(232,180,74,.2);border-radius:var(--r);padding:12px 14px}
+.month-footer h3{font-size:12px;color:var(--accent);font-family:var(--mono);margin-bottom:8px}
+.month-footer-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+
+/* CARD panel */
+.sectors{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+@media(max-width:420px){.sectors{grid-template-columns:1fr}}
+.sector{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;justify-content:space-between}
+.sector-name{font-size:12px;color:var(--text)}
+.sector-pts{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.sector-bar{height:3px;background:var(--bg4);border-radius:2px;margin-top:6px;overflow:hidden}
+.sector-fill{height:100%;border-radius:2px;background:var(--blue)}
+.sector.priority .sector-fill{background:var(--amber)}
+.blocker-list{margin-bottom:12px}
+.blocker{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:rgba(232,93,93,.08);border:1px solid rgba(232,93,93,.2);border-radius:var(--r);margin-bottom:6px;font-size:13px;color:var(--red)}
+.blocker-icon{font-size:16px;flex-shrink:0}
+
+/* SETTINGS panel */
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.setting-label{font-size:14px;color:var(--text)}
+.setting-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:44px;height:26px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--bg4);border-radius:13px;cursor:pointer;transition:.3s}
+.slider::before{content:'';position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:var(--muted);border-radius:50%;transition:.3s}
+input:checked+.slider{background:var(--accent)}
+input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
+.notif-status{font-size:13px;padding:10px 14px;background:var(--bg2);border-radius:var(--r);border:1px solid var(--border);margin-top:12px;color:var(--muted);font-family:var(--mono)}
+.btn-primary{width:100%;padding:13px;background:var(--accent);color:#0f1923;border:none;border-radius:var(--r);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;transition:all .2s}
+.btn-primary:hover{background:var(--accent2)}
+.btn-secondary{width:100%;padding:12px;background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:13px;cursor:pointer;margin-top:8px;transition:all .2s}
+.btn-secondary:hover{border-color:rgba(255,255,255,.2)}
+
+/* Install banner */
+.install-banner{background:linear-gradient(135deg,var(--bg3),var(--bg4));border:1px solid rgba(232,180,74,.3);border-radius:var(--r);padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.install-banner p{font-size:13px;color:var(--text);line-height:1.4}
+.install-banner p span{color:var(--accent);font-weight:500}
+.install-btn{flex-shrink:0;padding:7px 14px;background:var(--accent);color:#0f1923;border:none;border-radius:8px;font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer}
+
+/* Summary bar */
+.summary-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;text-align:center}
+.stat-num{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--accent);line-height:1}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 18px;font-size:13px;color:var(--text);z-index:999;transition:transform .3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-logo">
+    <div class="hdr-mark">TМ</div>
+    <div>
+      <div class="hdr-title">ТеМАХ РМ</div>
+      <div class="hdr-sub">Кърджали · Раднево</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="hdr-date" id="hdr-date"></div>
+    <button class="notif-btn" id="notif-btn" onclick="toggleNotif()" title="Нотификации">🔔</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button class="nav-btn on" onclick="nav('today',this)">Днес</button>
+  <button class="nav-btn" onclick="nav('week',this)">Седмица</button>
+  <button class="nav-btn" onclick="nav('month',this)">Месец</button>
+  <button class="nav-btn" onclick="nav('card',this)">Контролна карта</button>
+  <button class="nav-btn" onclick="nav('settings',this)">⚙ Настройки</button>
+</div>
+
+<div class="main">
+
+<!-- ===== TODAY ===== -->
+<div class="panel on" id="p-today">
+  <div id="install-banner" class="install-banner" style="display:none">
+    <div>📱</div>
+    <p>Добави на <span>началния екран</span> за бърз достъп и нотификации</p>
+    <button class="install-btn" onclick="installApp()">Инсталирай</button>
+  </div>
+
+  <div class="today-header">
+    <div>
+      <h2 id="today-title">Днес</h2>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px" id="today-sub"></div>
+    </div>
+    <div class="progress-ring-wrap">
+      <svg width="44" height="44" style="transform:rotate(-90deg)">
+        <circle cx="22" cy="22" r="18" fill="none" stroke="var(--bg4)" stroke-width="3"/>
+        <circle id="prog-ring" cx="22" cy="22" r="18" fill="none" stroke="var(--accent)" stroke-width="3" stroke-dasharray="113" stroke-dashoffset="113" style="transition:stroke-dashoffset .5s"/>
+      </svg>
+      <span class="pct-label" id="prog-pct">0%</span>
+    </div>
+  </div>
+
+  <div class="summary-bar">
+    <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Общо</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-done" style="color:var(--green)">0</div><div class="stat-lbl">Готово</div></div>
+    <div class="stat-card"><div class="stat-num" id="stat-left" style="color:var(--red)">0</div><div class="stat-lbl">Остават</div></div>
+  </div>
+
+  <div id="task-list"></div>
+</div>
+
+<!-- ===== WEEK ===== -->
+<div class="panel" id="p-week">
+  <div class="section-label" style="margin-top:4px">Модел на работната седмица</div>
+  <div class="week-grid">
+    <div class="day-card" id="dc-1">
+      <div class="day-hd">Понеделник</div>
+      <div class="day-body">
+        <div class="ev ev-r"><strong>Справка минуси</strong>От Даяна Иванова — незакрити движения</div>
+        <div class="ev ev-r"><strong>Колоранти 11:00ч</strong>Снимка до Полина Великова</div>
+        <div class="ev ev-b"><strong>Дистанц.контрол</strong>Минуси + обратни движения</div>
+        <div class="ev ev-a"><strong>Комуникация</strong>Обратна връзка — задачи от бюлетин</div>
+      </div>
+    </div>
+    <div class="day-card" id="dc-2">
+      <div class="day-hd">Вторник</div>
+      <div class="day-body">
+        <div class="ev ev-b"><strong>Онлайн среща</strong>Магазини — задачи от бюлетин</div>
+        <div class="ev ev-a"><strong>Справка М.Павлова</strong>Необработени заявки</div>
+        <div class="ev ev-g"><strong>Посещение</strong>Седм.1: Карта 1/2 · Седм.2: Планограми</div>
+      </div>
+    </div>
+    <div class="day-card" id="dc-3">
+      <div class="day-hd">Сряда</div>
+      <div class="day-body">
+        <div class="ev ev-r"><strong>OneDrive списъци</strong>Стока за връщане (задълж.)</div>
+        <div class="ev ev-r"><strong>Ревизии до 16:00</strong>ZINVCHECK → изпрати</div>
+        <div class="ev ev-a"><strong>Рекламации осв.</strong>Качи в ZINVCOUNT</div>
+      </div>
+    </div>
+    <div class="day-card" id="dc-4">
+      <div class="day-hd">Четвъртък</div>
+      <div class="day-body">
+        <div class="ev ev-g"><strong>Посещение</strong>Зала + склад + промозони</div>
+        <div class="ev ev-b"><strong>Follow-up сряда</strong>Разлики, ревизии изпратени?</div>
+        <div class="ev ev-gray"><strong>Планиране</strong>Подготовка за петъчен анализ</div>
+      </div>
+    </div>
+    <div class="day-card" id="dc-5">
+      <div class="day-hd">Петък</div>
+      <div class="day-body">
+        <div class="ev ev-b"><strong>Камери — анализ</strong>5 точки за всеки обект</div>
+        <div class="ev ev-a"><strong>Справка М.Павлова</strong>2-ра за седмицата</div>
+        <div class="ev ev-b"><strong>Обобщение</strong>Минуси + обратни движения</div>
+        <div class="ev ev-g"><strong>Планиране</strong>Следваща седмица — кой обект?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Посещения на обекти — логика</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+    <div style="font-size:13px;line-height:1.6;color:var(--text)">
+      <div style="margin-bottom:8px">📍 <strong>Кърджали</strong> · 1ч от теб · <span style="color:var(--muted)">Планирай вторник или четвъртък</span></div>
+      <div style="margin-bottom:8px">📍 <strong>Раднево</strong> · 1ч от теб · <span style="color:var(--muted)">Планирай вторник или четвъртък</span></div>
+      <div style="font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:10px;margin-top:4px">Седм. 1 и 4 → Контролна карта · Седм. 2 → Планограми + случайна ревизия · Редувай обектите — не ходи на едно място два пъти подред</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MONTH ===== -->
+<div class="panel" id="p-month">
+  <div class="section-label" style="margin-top:4px">Месечен ритъм на работа</div>
+  <div class="month-grid">
+    <div class="wk-card">
+      <h3>// СЕДМ. 1 — НА МЯСТО</h3>
+      <div class="mi"><div class="dot" style="background:var(--red)"></div><div>Дневен план на обекта</div></div>
+      <div class="mi"><div class="dot" style="background:var(--red)"></div><div>Чек-листи на управителя</div></div>
+      <div class="mi"><div class="dot" style="background:var(--red)"></div><div><strong>Контролна карта 1/2</strong></div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Промозони + брошури</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Подредби и стандарти</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Складове + пожарна</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Неприета стока &gt;1 ден</div></div>
+    </div>
+    <div class="wk-card">
+      <h3>// СЕДМ. 2 — НА МЯСТО</h3>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Планограми + мостреници</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Случайна ревизия 1–3 арт.</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Неприета стока &gt;1 ден</div></div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <div class="mi"><div class="dot" style="background:var(--muted)"></div><div style="color:var(--muted);font-size:11px">Дистанц.: Минуси, камери, обратни движения</div></div>
+      </div>
+    </div>
+    <div class="wk-card">
+      <h3>// СЕДМ. 3 — НА МЯСТО</h3>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Неприета стока &gt;1 ден</div></div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <div class="mi"><div class="dot" style="background:var(--muted)"></div><div style="color:var(--muted);font-size:11px">Дистанц.: Минуси, камери, обратни движения</div></div>
+      </div>
+    </div>
+    <div class="wk-card">
+      <h3>// СЕДМ. 4 — НА МЯСТО</h3>
+      <div class="mi"><div class="dot" style="background:var(--red)"></div><div><strong>Контролна карта 2/2</strong></div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Неприета стока &gt;1 ден</div></div>
+      <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+        <div class="mi"><div class="dot" style="background:var(--muted)"></div><div style="color:var(--muted);font-size:11px">Дистанц.: Минуси, камери, обратни движения</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="month-footer">
+    <h3>// ФИНАЛНИ МЕСЕЧНИ ЗАДАЧИ</h3>
+    <div class="month-footer-grid">
+      <div class="mi"><div class="dot" style="background:var(--red)"></div><div>Обобщение 2 карти + архив</div></div>
+      <div class="mi"><div class="dot" style="background:var(--red)"></div><div>&gt;15% разлика → план корекция</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Финало изчистване стока на път</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Брак и преоценка — потвърди</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Досиета + тренинг програми</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Одобри графици + отпуски</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Засечка главна каса</div></div>
+      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Консумативи, брак, движения</div></div>
+      <div class="mi"><div class="dot" style="background:var(--green)"></div><div>Подготовка следващ месец</div></div>
+      <div class="mi"><div class="dot" style="background:var(--green)"></div><div>Командировки + обучения</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CARD ===== -->
+<div class="panel" id="p-card">
+  <div class="section-label" style="margin-top:4px">Блокиращи критерии — без бонус при дори едно НЕ</div>
+  <div class="blocker-list">
+    <div class="blocker"><div class="blocker-icon">⛔</div><div>Касови продажби — без резултат = без бонус за целия обект</div></div>
+    <div class="blocker"><div class="blocker-icon">⛔</div><div>Всички цели палета сухи смеси — проверка за изтекъл срок</div></div>
+    <div class="blocker"><div class="blocker-icon">⛔</div><div>Всички с униформи и баджове + проверка от камери</div></div>
+    <div class="blocker"><div class="blocker-icon">⛔</div><div>Изрядна документация + пожарогасители в срок</div></div>
+  </div>
+
+  <div class="section-label">17 сектора — точки и приоритет</div>
+  <div class="sectors">
+    <div class="sector priority"><div><div class="sector-name">16. Касова зона и бюра</div><div class="sector-bar"><div class="sector-fill" style="width:100%"></div></div></div><span class="sector-pts">16т ⭐</span></div>
+    <div class="sector priority"><div><div class="sector-name">1. Плочки и ламинат</div><div class="sector-bar"><div class="sector-fill" style="width:87%"></div></div></div><span class="sector-pts">14т ⭐</span></div>
+    <div class="sector priority"><div><div class="sector-name">3. Баня и ВиК</div><div class="sector-bar"><div class="sector-fill" style="width:87%"></div></div></div><span class="sector-pts">14т ⭐</span></div>
+    <div class="sector"><div><div class="sector-name">10. Градински мебели</div><div class="sector-bar"><div class="sector-fill" style="width:75%"></div></div></div><span class="sector-pts">12т</span></div>
+    <div class="sector"><div><div class="sector-name">2. Строителство</div><div class="sector-bar"><div class="sector-fill" style="width:69%"></div></div></div><span class="sector-pts">11т</span></div>
+    <div class="sector"><div><div class="sector-name">5. Подови настилки</div><div class="sector-bar"><div class="sector-fill" style="width:69%"></div></div></div><span class="sector-pts">11т</span></div>
+    <div class="sector"><div><div class="sector-name">7. Бои и облицовки</div><div class="sector-bar"><div class="sector-fill" style="width:69%"></div></div></div><span class="sector-pts">11т</span></div>
+    <div class="sector"><div><div class="sector-name">9. Градина</div><div class="sector-bar"><div class="sector-fill" style="width:63%"></div></div></div><span class="sector-pts">10т</span></div>
+    <div class="sector"><div><div class="sector-name">11. Крепежи и врати</div><div class="sector-bar"><div class="sector-fill" style="width:63%"></div></div></div><span class="sector-pts">10т</span></div>
+    <div class="sector"><div><div class="sector-name">12. Входна зона</div><div class="sector-bar"><div class="sector-fill" style="width:63%"></div></div></div><span class="sector-pts">10т</span></div>
+    <div class="sector"><div><div class="sector-name">17. Осветление</div><div class="sector-bar"><div class="sector-fill" style="width:63%"></div></div></div><span class="sector-pts">10т</span></div>
+    <div class="sector"><div><div class="sector-name">6. Домашни потреби</div><div class="sector-bar"><div class="sector-fill" style="width:56%"></div></div></div><span class="sector-pts">9т</span></div>
+    <div class="sector"><div><div class="sector-name">8. Ел.и градин.машини</div><div class="sector-bar"><div class="sector-fill" style="width:56%"></div></div></div><span class="sector-pts">9т</span></div>
+    <div class="sector"><div><div class="sector-name">13. Вътрешен склад</div><div class="sector-bar"><div class="sector-fill" style="width:56%"></div></div></div><span class="sector-pts">9т</span></div>
+    <div class="sector"><div><div class="sector-name">14. Външен склад</div><div class="sector-bar"><div class="sector-fill" style="width:56%"></div></div></div><span class="sector-pts">9т</span></div>
+    <div class="sector"><div><div class="sector-name">4. Текстил</div><div class="sector-bar"><div class="sector-fill" style="width:50%"></div></div></div><span class="sector-pts">8т</span></div>
+    <div class="sector"><div><div class="sector-name">15. Плац</div><div class="sector-bar"><div class="sector-fill" style="width:31%"></div></div></div><span class="sector-pts">5т</span></div>
+  </div>
+  <div style="margin-top:10px;padding:10px 14px;background:rgba(232,180,74,.08);border:1px solid rgba(232,180,74,.2);border-radius:var(--r);font-size:12px;color:var(--amber)">
+    ⭐ Приоритет: Касова зона + Плочки + Баня = 44/87т. Ако тези три са перфектни, имаш 50% от оценката покрита.
+  </div>
+</div>
+
+<!-- ===== SETTINGS ===== -->
+<div class="panel" id="p-settings">
+  <div class="section-label" style="margin-top:4px">Нотификации</div>
+
+  <div class="setting-row">
+    <div><div class="setting-label">Push нотификации</div><div class="setting-sub">Напомняния за задачи в браузъра</div></div>
+    <label class="toggle"><input type="checkbox" id="notif-toggle" onchange="toggleNotifSetting(this.checked)"><span class="slider"></span></label>
+  </div>
+
+  <div class="notif-status" id="notif-status">Статус: проверява се...</div>
+
+  <button class="btn-primary" onclick="requestNotif()">🔔 Активирай нотификации</button>
+  <button class="btn-secondary" onclick="testNotif()">Тест нотификация</button>
+
+  <div class="section-label" style="margin-top:20px">Напомняния по часове</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px">
+    <div class="setting-row" style="border:none;padding:6px 0">
+      <div><div class="setting-label" style="font-size:13px">08:00 — Сутрешни задачи</div><div class="setting-sub">Минуси, дневен план</div></div>
+      <label class="toggle"><input type="checkbox" id="r-morning" checked><span class="slider"></span></label>
+    </div>
+    <div class="setting-row" style="border:none;padding:6px 0">
+      <div><div class="setting-label" style="font-size:13px">14:00 — Следобедни задачи</div><div class="setting-sub">Ревизии, стока за връщане</div></div>
+      <label class="toggle"><input type="checkbox" id="r-afternoon" checked><span class="slider"></span></label>
+    </div>
+    <div class="setting-row" style="border:none;padding:6px 0">
+      <div><div class="setting-label" style="font-size:13px">17:00 — Краен преглед</div><div class="setting-sub">Незавършени задачи</div></div>
+      <label class="toggle"><input type="checkbox" id="r-evening" checked><span class="slider"></span></label>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:20px">Инсталиране</div>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;font-size:13px;color:var(--text);line-height:1.6">
+    <div style="margin-bottom:8px"><strong style="color:var(--accent)">Android Chrome:</strong> Меню (⋮) → „Добави към началния екран"</div>
+    <div style="margin-bottom:8px"><strong style="color:var(--accent)">iPhone Safari:</strong> Сподели (□↑) → „Добави към началния екран"</div>
+    <div><strong style="color:var(--accent)">Компютър Chrome:</strong> Иконата ⊕ в адресната лента</div>
+  </div>
+  <button class="btn-secondary" onclick="installApp()">📲 Инсталирай като приложение</button>
+</div>
+
+</div><!-- /main -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const TASKS = {
+  0: [ // Sunday
+    {id:'sun1',t:'Почивен ден',m:'Планирай следващата седмица',c:'amber',badge:'amber',bl:'Планиране'}
+  ],
+  1: [ // Monday
+    {id:'mon1',t:'Справка минуси — незакрити движения',m:'От Даяна Иванова • проверявай всеки обект',c:'red',badge:'red',bl:'Критично'},
+    {id:'mon2',t:'Снимка на колорантите до 11:00ч',m:'До Полина Великова: p.velikova@temax.bg',c:'red',badge:'red',bl:'Срок 11:00'},
+    {id:'mon3',t:'Провери незакрити движения (952/954)',m:'Изпълнени ли са до 2 дни след ревизия?',c:'blue',badge:'blue',bl:'Контрол'},
+    {id:'mon4',t:'Обратна връзка по задачи от бюлетина',m:'Задължителен отговор дори при „нямаме нищо"',c:'amber',badge:'amber',bl:'Комуникация'},
+  ],
+  2: [ // Tuesday
+    {id:'tue1',t:'Онлайн среща с магазините',m:'Задачи от бюлетина — проверка за разбиране',c:'blue',badge:'blue',bl:'Среща'},
+    {id:'tue2',t:'Справка М.Павлова — необработени заявки',m:'Реагирай веднага при открити проблеми',c:'amber',badge:'amber',bl:'Важно'},
+    {id:'tue3',t:'Планирай посещение на обект',m:'Кърджали или Раднево — 1ч път',c:'green',badge:'green',bl:'Теренно'},
+  ],
+  3: [ // Wednesday
+    {id:'wed1',t:'Попълни OneDrive: Стока за връщане',m:'Задължително всяка сряда',c:'red',badge:'red',bl:'Срок сряда'},
+    {id:'wed2',t:'Попълни OneDrive: Стока за изтегляне по разлики',m:'Задължително всяка сряда',c:'red',badge:'red',bl:'Срок сряда'},
+    {id:'wed3',t:'Ревизии — качи до 16:00ч',m:'ZINVCHECK → изпрати до 3 имейла',c:'red',badge:'red',bl:'Срок 16:00'},
+    {id:'wed4',t:'Рекламации осветление — качи в ZINVCOUNT',m:'След осчетоводяване на ревизиите',c:'amber',badge:'amber',bl:'Важно'},
+    {id:'wed5',t:'Срокове на годност — провери качването',m:'Обектите качили ли са в SAP?',c:'amber',badge:'amber',bl:'Контрол'},
+  ],
+  4: [ // Thursday
+    {id:'thu1',t:'Посещение на обект — зала + склад',m:'Промозони, стандарти, обслужване',c:'green',badge:'green',bl:'Теренно'},
+    {id:'thu2',t:'Follow-up от сряда',m:'Разлики и ревизии изпратени ли са от обектите?',c:'blue',badge:'blue',bl:'Контрол'},
+  ],
+  5: [ // Friday
+    {id:'fri1',t:'Анализ на камери — всеки обект',m:'Опашки, оперативки, групички, анулирани бонове',c:'blue',badge:'blue',bl:'Контрол'},
+    {id:'fri2',t:'Справка М.Павлова — 2-ра за седмицата',m:'Необработени заявки + неизписани документи',c:'amber',badge:'amber',bl:'Важно'},
+    {id:'fri3',t:'Седмично обобщение: минуси + обратни движения',m:'Финален преглед на незатворени въпроси',c:'blue',badge:'blue',bl:'Анализ'},
+    {id:'fri4',t:'Планиране следваща седмица',m:'Кой обект? Какви задачи? Контролна карта?',c:'green',badge:'green',bl:'Планиране'},
+  ],
+  6: [ // Saturday
+    {id:'sat1',t:'Почивен ден',m:'',c:'gray',badge:'',bl:''}
+  ]
+};
+
+const COLORS = {red:'var(--red)',amber:'var(--amber)',blue:'var(--blue)',green:'var(--green)',gray:'var(--muted)'};
+const DAY_BG = {red:'badge-red',amber:'badge-amber',blue:'badge-blue',green:'badge-green',gray:''};
+const DAY_NAMES = ['Неделя','Понеделник','Вторник','Сряда','Четвъртък','Петък','Събота'];
+const MONTH_NAMES = ['Януари','Февруари','Март','Април','Май','Юни','Юли','Август','Септември','Октомври','Ноември','Декември'];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let done = JSON.parse(localStorage.getItem('tm-done') || '{}');
+let notifEnabled = false;
+let deferredPrompt = null;
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  renderToday();
+  updateHeader();
+  highlightTodayCol();
+  checkNotifStatus();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
+});
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-banner').style.display = 'flex';
+});
+
+// ─── HEADER ──────────────────────────────────────────────────────────────────
+function updateHeader() {
+  const now = new Date();
+  const el = document.getElementById('hdr-date');
+  el.innerHTML = DAY_NAMES[now.getDay()] + '<br>' + now.getDate() + ' ' + MONTH_NAMES[now.getMonth()];
+}
+
+function highlightTodayCol() {
+  const d = new Date().getDay();
+  const map = {1:'dc-1',2:'dc-2',3:'dc-3',4:'dc-4',5:'dc-5'};
+  if (map[d]) document.getElementById(map[d])?.classList.add('today-col');
+}
+
+// ─── NAV ─────────────────────────────────────────────────────────────────────
+function nav(id, btn) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('p-' + id).classList.add('on');
+}
+
+// ─── TODAY ───────────────────────────────────────────────────────────────────
+function renderToday() {
+  const dow = new Date().getDay();
+  const tasks = TASKS[dow] || [];
+  const list = document.getElementById('task-list');
+
+  // Group by badge label
+  const groups = {};
+  tasks.forEach(t => {
+    const g = t.bl || 'Задачи';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(t);
+  });
+
+  let html = '';
+  for (const [grp, items] of Object.entries(groups)) {
+    html += `<div class="section-label">${grp}</div>`;
+    items.forEach(t => {
+      const isDone = !!done[t.id];
+      const col = COLORS[t.c] || 'var(--border)';
+      const badgeCls = DAY_BG[t.badge] || '';
+      html += `<div class="task ${isDone?'done':''}" style="--task-color:${col}" onclick="toggleTask('${t.id}')">
+        <div class="task-check">${isDone?'✓':''}</div>
+        <div class="task-body">
+          <div class="task-title">${t.t}</div>
+          ${t.m ? `<div class="task-meta">${t.m}</div>` : ''}
+          ${t.bl && badgeCls ? `<span class="task-badge ${badgeCls}">${t.bl}</span>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+
+  if (tasks.length === 0 || tasks[0].id.startsWith('sun') || tasks[0].id.startsWith('sat')) {
+    html = '<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">🏖</div><div style="font-size:15px">Почивен ден</div><div style="font-size:13px;margin-top:4px">Следващата седмица те чака!</div></div>';
+  }
+
+  list.innerHTML = html;
+
+  // Update today title
+  document.getElementById('today-title').textContent = DAY_NAMES[dow];
+  const now = new Date();
+  document.getElementById('today-sub').textContent = now.getDate() + ' ' + MONTH_NAMES[now.getMonth()] + ' ' + now.getFullYear();
+
+  updateProgress(tasks);
+}
+
+function toggleTask(id) {
+  done[id] = !done[id];
+  if (!done[id]) delete done[id];
+  localStorage.setItem('tm-done', JSON.stringify(done));
+  renderToday();
+  toast(done[id] === undefined ? '↩ Отменено' : '✓ Отбелязано');
+}
+
+function updateProgress(tasks) {
+  if (!tasks || !tasks.length || tasks[0].id.startsWith('sun') || tasks[0].id.startsWith('sat')) {
+    document.getElementById('prog-ring').style.strokeDashoffset = 113;
+    document.getElementById('prog-pct').textContent = '—';
+    document.getElementById('stat-total').textContent = 0;
+    document.getElementById('stat-done').textContent = 0;
+    document.getElementById('stat-left').textContent = 0;
+    return;
+  }
+  const total = tasks.length;
+  const doneCount = tasks.filter(t => done[t.id]).length;
+  const pct = total ? Math.round(doneCount / total * 100) : 0;
+  const offset = 113 - (113 * pct / 100);
+  document.getElementById('prog-ring').style.strokeDashoffset = offset;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-done').textContent = doneCount;
+  document.getElementById('stat-left').textContent = total - doneCount;
+}
+
+// ─── NOTIFICATIONS ───────────────────────────────────────────────────────────
+async function checkNotifStatus() {
+  const el = document.getElementById('notif-status');
+  const btn = document.getElementById('notif-btn');
+  if (!('Notification' in window)) {
+    el.textContent = 'Статус: браузърът не поддържа нотификации';
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    el.textContent = 'Статус: ✓ Нотификациите са активни';
+    el.style.color = 'var(--green)';
+    document.getElementById('notif-toggle').checked = true;
+    btn.classList.add('on');
+    notifEnabled = true;
+    scheduleReminders();
+  } else if (Notification.permission === 'denied') {
+    el.textContent = 'Статус: ✗ Нотификациите са блокирани в браузъра';
+    el.style.color = 'var(--red)';
+  } else {
+    el.textContent = 'Статус: Не са активирани — натисни бутона';
+  }
+}
+
+async function requestNotif() {
+  if (!('Notification' in window)) {
+    toast('Браузърът не поддържа нотификации');
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    document.getElementById('notif-btn').classList.add('on');
+    notifEnabled = true;
+    scheduleReminders();
+    toast('✓ Нотификациите са активирани');
+    checkNotifStatus();
+    // Welcome notif
+    setTimeout(() => {
+      new Notification('ТеМАХ РМ ✓', {body: 'Нотификациите са активни. Ще те напомним за задачите!', icon: ''});
+    }, 500);
+  } else {
+    toast('Нотификациите бяха отказани');
+  }
+}
+
+function toggleNotif() {
+  if (Notification.permission !== 'granted') {
+    requestNotif();
+  } else {
+    nav('settings', document.querySelectorAll('.nav-btn')[4]);
+  }
+}
+
+function toggleNotifSetting(on) {
+  if (on && Notification.permission !== 'granted') {
+    requestNotif();
+  }
+}
+
+function testNotif() {
+  if (Notification.permission !== 'granted') {
+    toast('Първо активирай нотификациите');
+    return;
+  }
+  const dow = new Date().getDay();
+  const tasks = (TASKS[dow] || []).filter(t => !done[t.id]);
+  const msg = tasks.length
+    ? `Имаш ${tasks.length} незавършени задачи за днес`
+    : 'Всички задачи за днес са изпълнени! 🎉';
+  new Notification('ТеМАХ РМ — ' + DAY_NAMES[dow], {body: msg, tag: 'temax-test'});
+}
+
+function scheduleReminders() {
+  // Check every minute if it's time for a reminder
+  setInterval(() => {
+    const now = new Date();
+    const h = now.getHours(), m = now.getMinutes();
+    const dow = now.getDay();
+    if (m !== 0) return; // Only on the hour
+    const tasks = (TASKS[dow] || []).filter(t => !done[t.id]);
+    if (!tasks.length) return;
+    const reminders = [];
+    if (h === 8 && document.getElementById('r-morning')?.checked) reminders.push('Сутрешни задачи');
+    if (h === 14 && document.getElementById('r-afternoon')?.checked) reminders.push('Следобедни задачи');
+    if (h === 17 && document.getElementById('r-evening')?.checked) reminders.push('Краен преглед на деня');
+    reminders.forEach(r => {
+      new Notification('ТеМАХ РМ — ' + r, {
+        body: `${tasks.length} незавършени задачи за ${DAY_NAMES[dow]}`,
+        tag: 'temax-' + h
+      });
+    });
+  }, 60000);
+}
+
+// ─── INSTALL ─────────────────────────────────────────────────────────────────
+async function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') toast('✓ Приложението е инсталирано');
+    deferredPrompt = null;
+    document.getElementById('install-banner').style.display = 'none';
+  } else {
+    toast('Виж инструкциите за инсталиране по-горе');
+  }
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// Auto-reset done tasks at midnight
+setInterval(() => {
+  const now = new Date();
+  if (now.getHours() === 0 && now.getMinutes() === 0) {
+    done = {};
+    localStorage.setItem('tm-done', '{}');
+    renderToday();
+  }
+}, 60000);
+</script>
+</body>
+</html>
