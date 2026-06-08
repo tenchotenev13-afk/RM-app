@@ -163,6 +163,8 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
   <button class="nav-btn" onclick="nav('month',this)">Месец</button>
   <button class="nav-btn" onclick="nav('sap',this)">SAP</button>
   <button class="nav-btn" onclick="nav('edit',this)">✏ Бюлетин</button>
+  <button class="nav-btn" onclick="nav('joker',this)">🃏 Жокери</button>
+  <button class="nav-btn" onclick="nav('team',this)">👥 Екип</button>
   <button class="nav-btn" onclick="nav('settings',this)">⚙</button>
 </div>
 
@@ -282,22 +284,41 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
 
 <!-- BULLETIN EDITOR -->
 <div class="panel" id="p-edit">
-  <div class="editor-wrap">
-    <h3>✏ Задачи от бюлетина</h3>
-    <div class="editor-sub">Добавяй специфичните задачи от текущия бюлетин — те се показват в „Днес" с жълта маркировка и се нулират всяка седмица (неделя в полунощ).</div>
-    <div class="task-edit-list" id="edit-list"></div>
-    <button class="btn-add" onclick="addEditRow()">+ Добави задача</button>
-    <button class="btn-save" onclick="saveBulletin()">💾 Запази задачите</button>
-    <button class="btn-reset" onclick="resetBulletin()">↺ Нулирай за нова седмица</button>
+  <!-- Live bulletin from portal -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div>
+      <div style="font-size:16px;font-weight:500" id="bul-week-title">Т-Бюлетин</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px" id="bul-week-sub">Зарежда се от портала...</div>
+    </div>
+    <button onclick="loadPortalBulletin()" style="padding:6px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:12px;cursor:pointer">↺ Обнови</button>
   </div>
 
-  <div class="slbl">Типични задачи от бюлетин (примери)</div>
-  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:12px;line-height:1.7;color:var(--muted)">
-    <div>📅 <strong style="color:var(--text)">Понеделник:</strong> Стока на път (1-во число), Справка л.м. зануляване</div>
-    <div>📅 <strong style="color:var(--text)">Сряда:</strong> Срок на годност — качване в SAP до [дата]</div>
-    <div>📅 <strong style="color:var(--text)">Сряда:</strong> Ревизии групи до 16ч / Тази седмица ревизии няма</div>
-    <div>📅 <strong style="color:var(--text)">Всеки ден:</strong> Краен срок брак и консумативи — [дата]</div>
-    <div>📅 <strong style="color:var(--text)">Понеделник:</strong> Преоценка до Е.Гюрова — задължително</div>
+  <!-- Status / loading -->
+  <div id="bul-status" style="padding:14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);font-size:13px;color:var(--muted);text-align:center;margin-bottom:12px">
+    ⏳ Зарежда се...
+  </div>
+
+  <!-- Tasks from portal (read from Supabase) -->
+  <div id="bul-portal-tasks" style="display:none">
+    <div class="slbl">Задачи от портала тази седмица</div>
+    <div id="bul-tasks-list"></div>
+    <div style="margin-top:10px;padding:10px 12px;background:rgba(78,201,148,.08);border:1px solid rgba(78,201,148,.2);border-radius:var(--r);font-size:12px;color:var(--green)">
+      ✓ Задачите се зареждат автоматично от Т-Бюлетин портала. Не е нужно ръчно въвеждане.
+    </div>
+  </div>
+
+  <!-- Separator + manual additions -->
+  <div class="slbl" style="margin-top:16px">Допълнителни задачи (само за теб)</div>
+  <div class="editor-sub" style="margin-bottom:8px">За бележки или лични задачи, които не са в портала.</div>
+  <div class="task-edit-list" id="edit-list"></div>
+  <button class="btn-add" onclick="addEditRow()">+ Добави лична задача</button>
+  <button class="btn-save" onclick="saveBulletin()">💾 Запази</button>
+  <button class="btn-reset" onclick="resetBulletin()">↺ Нулирай личните задачи</button>
+
+  <!-- Portal link -->
+  <div style="margin-top:14px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:12px;color:var(--muted)">Отвори пълния бюлетин в портала</div>
+    <a href="https://tenchotenev13-afk.github.io/Tmax-store-portal/" target="_blank" style="padding:5px 12px;background:var(--accent);color:#0f1923;border-radius:7px;font-size:12px;font-weight:600;text-decoration:none">Отвори →</a>
   </div>
 </div>
 
@@ -336,6 +357,40 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
     <div style="margin-bottom:8px;color:var(--text);font-weight:500">Компютър Chrome / Edge:</div>
     <div style="color:var(--muted)">Иконката <strong style="color:var(--text)">⊕</strong> в края на адресната лента → Инсталирай</div>
   </div>
+</div>
+
+<!-- JOKERS -->
+<div class="panel" id="p-joker">
+  <div class="slbl" style="margin-top:2px">Изберете жокер</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+    <div style="background:var(--bg2);border:1px solid rgba(232,93,93,.3);border-radius:var(--r);padding:12px;cursor:pointer" onclick="showJoker('j1')">
+      <div style="font-size:15px;margin-bottom:4px">📋</div>
+      <div style="font-size:13px;font-weight:500;color:var(--red)">Разлики от доставчик</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">5 стъпки · бланка · линк</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid rgba(232,180,74,.3);border-radius:var(--r);padding:12px;cursor:pointer" onclick="showJoker('j2')">
+      <div style="font-size:15px;margin-bottom:4px">🔄</div>
+      <div style="font-size:13px;font-weight:500;color:var(--amber)">Разлики трансфери</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">4 стъпки · бланка · линк</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid rgba(78,201,148,.3);border-radius:var(--r);padding:12px;cursor:pointer" onclick="showJoker('j3')">
+      <div style="font-size:15px;margin-bottom:4px">↩</div>
+      <div style="font-size:13px;font-weight:500;color:var(--green)">Връщане на стока</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">5 стъпки · OneDrive</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid rgba(91,155,213,.3);border-radius:var(--r);padding:12px;cursor:pointer" onclick="showJoker('j4')">
+      <div style="font-size:15px;margin-bottom:4px">📦</div>
+      <div style="font-size:13px;font-weight:500;color:var(--blue)">Прием на стока</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">6 стъпки · ZGRPOST · MB90</div>
+    </div>
+  </div>
+  <div id="joker-content"></div>
+</div>
+
+<!-- TEAM -->
+<div class="panel" id="p-team">
+  <input class="sap-search" id="team-q" placeholder="🔍  Търси позиция..." oninput="filterTeam(this.value)">
+  <div id="team-list"></div>
 </div>
 
 </div><!-- /main -->
@@ -551,7 +606,12 @@ function renderToday() {
   // Add bulletin tasks for today's day
   const dayName = DAY[dow];
   const bTasks = bulletin.filter(b => b.day === dayName || b.day === 'Всеки ден').map((b,i) => ({
-    id:'b'+i, t:b.text, m:'от бюлетина', c:'a', bl:'Бюлетин', bulletin:true
+    id: b.id || ('b'+i),
+    t: b.text,
+    m: b.fromPortal ? '📡 от портала — Т-Бюлетин' : 'от бюлетина',
+    c: b.fromPortal ? 'b' : 'a',
+    bl: b.fromPortal ? 'Бюлетин (портал)' : 'Бюлетин',
+    bulletin: true
   }));
   const tasks = [...base, ...bTasks];
 
@@ -656,17 +716,21 @@ function filterSap(v) { renderSap(v); }
 // ── BULLETIN EDITOR ────────────────────────────────────────────────
 function renderEditList() {
   const el = document.getElementById('edit-list');
-  if (!bulletin.length) { el.innerHTML = '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Няма добавени задачи за тази седмица.</div>'; return; }
-  el.innerHTML = bulletin.map((b,i) => `
-    <div class="te-row">
-      <select class="te-day" onchange="bulletin[${i}].day=this.value">
+  const manual = bulletin.filter(b => !b.fromPortal);
+  if (!manual.length) { el.innerHTML = '<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Няма добавени лични задачи.</div>'; return; }
+  el.innerHTML = manual.map((b) => {
+    const realIdx = bulletin.indexOf(b);
+    return `<div class="te-row">
+      <select class="te-day" onchange="bulletin[${realIdx}].day=this.value">
         ${DAY.map(d=>`<option value="${d}"${b.day===d?' selected':''}>${d}</option>`).join('')}
         <option value="Всеки ден"${'Всеки ден'===b.day?' selected':''}>Всеки ден</option>
       </select>
-      <input class="te-txt" value="${b.text}" oninput="bulletin[${i}].text=this.value" placeholder="Задача от бюлетина...">
-      <button class="te-del" onclick="delBulletin(${i})">✕</button>
-    </div>`).join('');
+      <input class="te-txt" value="${b.text||''}" oninput="bulletin[${realIdx}].text=this.value" placeholder="Лична задача...">
+      <button class="te-del" onclick="delBulletin(${realIdx})">✕</button>
+    </div>`;
+  }).join('');
 }
+
 function addEditRow() {
   const dow = new Date().getDay();
   bulletin.push({day: DAY[dow]||'Понеделник', text:''});
@@ -677,15 +741,16 @@ function delBulletin(i) {
   renderEditList();
 }
 function saveBulletin() {
-  bulletin = bulletin.filter(b => b.text.trim());
+  // Only save non-portal tasks
+  bulletin = bulletin.filter(b => b.text && b.text.trim() && !b.fromPortal);
   localStorage.setItem('tm-bulletin', JSON.stringify(bulletin));
   renderEditList();
   renderToday();
   toast('✓ Задачите са запазени');
 }
 function resetBulletin() {
-  if (!confirm('Изтриваш всички задачи от бюлетина?')) return;
-  bulletin = [];
+  if (!confirm('Изтриваш личните задачи от бюлетина?')) return;
+  bulletin = bulletin.filter(b => b.fromPortal); // keep portal tasks in memory
   localStorage.setItem('tm-bulletin','[]');
   renderEditList();
   renderToday();
@@ -723,39 +788,661 @@ function toggleNotif() {
 function toggleNotifSetting(on) { if (on && Notification.permission!=='granted') reqNotif(); }
 function testNotif() {
   if (Notification.permission!=='granted') return toast('Първо активирай нотификациите');
-  const dow=new Date().getDay();
-  const tasks=(BASE[dow]||[]).filter(t=>!done[t.id]);
-  const bTasks=bulletin.filter(b=>b.day===DAY[dow]||b.day==='Всеки ден');
-  const total=tasks.length+bTasks.length;
-  new Notification('ТеМАХ РМ — '+DAY[dow], {
-    body: total ? `${total} незавършени задачи за днес` : '🎉 Всички задачи за днес са изпълнени!',
-    tag:'temax-test'
-  });
+  const dow = new Date().getDay();
+  const all = getTasksForNotif(dow);
+  const undone = all.filter(t => !done[t.id]);
+  const msg = undone.length
+    ? `${undone.length} незавършени задачи за ${DAY[dow]}`
+    : '🎉 Всички задачи за днес са изпълнени!';
+  new Notification('ТеМАХ РМ — ' + DAY[dow], {body: msg, tag: 'temax-test'});
 }
 function scheduleReminders() {
   if (Notification.permission!=='granted') return;
   setInterval(() => {
     const n=new Date(), h=n.getHours(), m=n.getMinutes(), dow=n.getDay();
     if (m!==0) return;
-    const tasks=[...(BASE[dow]||[]),...bulletin.filter(b=>b.day===DAY[dow]||b.day==='Всеки ден')]
-      .filter(t=>!done[t.id]);
-    if (!tasks.length) return;
+    const allTasks = getTasksForNotif(dow);
+    const undone = allTasks.filter(t => !done[t.id]);
+    if (!undone.length) return;
     const labels={8:'Сутрешни задачи',14:'Следобедни задачи',17:'Краен преглед'};
     const ids={8:'r1',14:'r2',17:'r3'};
     if (labels[h] && document.getElementById(ids[h])?.checked) {
-      new Notification('ТеМАХ РМ — '+labels[h], {body:`${tasks.length} незавършени за ${DAY[dow]}`, tag:'temax-'+h});
+      new Notification('ТеМАХ РМ — '+labels[h], {
+        body: undone.length+' незавършени задачи за '+DAY[dow],
+        tag:'temax-'+h
+      });
     }
   }, 60000);
 }
 
-// ── TOAST ──────────────────────────────────────────────────────────
+// ── SUPABASE BULLETIN INTEGRATION ─────────────────────────────────
+var SB_URL = 'https://xiwkdiqqplgdcrkewgtv.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpd2tkaXFxcGxnZGNya2V3Z3R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NTA5MjYsImV4cCI6MjA5NTEyNjkyNn0.aOlvvQI6x5wS60iH7rMDD7j_Go9FMP1YkWrLnfeL0CA';
+
+var DEPT_LABELS = {
+  trade: {label:'Търговска', color:'var(--green)', icon:'🛒'},
+  warehouse: {label:'Склад/Приемане', color:'var(--blue)', icon:'📦'},
+  admin: {label:'Администрация', color:'var(--muted)', icon:'⚙️'}
+};
+
+var portalTasks = []; // tasks loaded from portal
+var portalBulId = null;
+
+function sbFetch(table, query) {
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var timeout = controller ? setTimeout(function() { controller.abort(); }, 8000) : null;
+  var opts = {
+    method: 'GET',
+    mode: 'cors',
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  };
+  if (controller) opts.signal = controller.signal;
+  return fetch(SB_URL + '/rest/v1/' + table + '?' + query, opts)
+    .then(function(r) {
+      if (timeout) clearTimeout(timeout);
+      if (!r.ok) return r.text().then(function(t) { throw new Error('HTTP ' + r.status + ': ' + t); });
+      return r.json();
+    })
+    .catch(function(err) {
+      if (timeout) clearTimeout(timeout);
+      throw err;
+    });
+}
+
+function showCorsHelp() {
+  alert('За да поправиш CORS грешката:\n\n1. supabase.com/dashboard → проект xiwkdiqqplgdcrkewgtv\n2. Settings → API → "Allowed Origins" / "CORS"\n3. Добави: https://tenchotenev13-afk.github.io\n4. Save\n\nАко не намираш опцията: Authentication → URL Configuration → Site URL');
+}
+
+function getTasksForNotif(dow) {
+  var base = BASE[dow] || [];
+  var dayName = DAY[dow];
+  var dayISO = new Date().toISOString().slice(0,10);
+  var portal = portalTasks.filter(function(t) {
+    if (!t.due_date) return dow >= 1 && dow <= 5;
+    return t.due_date === dayISO;
+  }).map(function(t) { return {id: 'portal-'+t.id}; });
+  var manual = bulletin.filter(function(b) {
+    return (b.day === dayName || b.day === 'Всеки ден') && !b.fromPortal;
+  }).map(function(b, i) { return {id: 'b'+i}; });
+  return base.concat(portal).concat(manual);
+}
+
+  var dt = new Date(d); dt.setHours(0,0,0,0);
+  dt.setDate(dt.getDate() + 3 - (dt.getDay() + 6) % 7);
+  var w1 = new Date(dt.getFullYear(), 0, 4);
+  return 1 + Math.round(((dt - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+}
+
+function loadPortalBulletin() {
+  var statusEl = document.getElementById('bul-status');
+  var portalEl = document.getElementById('bul-portal-tasks');
+  var taskListEl = document.getElementById('bul-tasks-list');
+  var titleEl = document.getElementById('bul-week-title');
+  var subEl = document.getElementById('bul-week-sub');
+
+  if (!statusEl) return;
+  statusEl.style.display = 'block';
+  statusEl.textContent = '⏳ Зарежда се от портала...';
+  if (portalEl) portalEl.style.display = 'none';
+
+  var now = new Date();
+  var wk = getWeekNum(now);
+  var yr = now.getFullYear();
+
+  // Get latest published bulletin
+  sbFetch('bulletins', 'status=eq.published&order=published_at.desc&limit=1')
+    .then(function(data) {
+      if (!data || !data.length) {
+        // Try draft too
+        return sbFetch('bulletins', 'order=created_at.desc&limit=1');
+      }
+      return data;
+    })
+    .then(function(data) {
+      if (!data || !data.length) {
+        statusEl.textContent = '⚠ Няма публикуван бюлетин в портала.';
+        statusEl.style.color = 'var(--amber)';
+        return;
+      }
+      var bul = data[0];
+      portalBulId = bul.id;
+      var bulWk = bul.week_number || wk;
+      var bulYr = bul.year || yr;
+
+      if (titleEl) titleEl.textContent = 'Т-Бюлетин — Седмица ' + bulWk;
+      if (subEl) subEl.textContent = 'С' + bulWk + ' · ' + bulYr + (bul.status === 'draft' ? ' · Чернова' : ' · Публикуван');
+
+      // Load tasks for this bulletin
+      return sbFetch('bulletin_tasks', 'bulletin_id=eq.' + bul.id + '&order=due_date.asc')
+        .then(function(tasks) {
+          portalTasks = Array.isArray(tasks) ? tasks : [];
+
+          if (!portalTasks.length) {
+            statusEl.textContent = '📭 Няма задачи в бюлетина за тази седмица.';
+            statusEl.style.color = 'var(--muted)';
+            return;
+          }
+
+          // Group by department
+          var byDept = {};
+          portalTasks.forEach(function(t) {
+            var d = t.department || 'admin';
+            if (!byDept[d]) byDept[d] = [];
+            byDept[d].push(t);
+          });
+
+          var html = '';
+          Object.keys(byDept).forEach(function(dk) {
+            var dept = DEPT_LABELS[dk] || {label: dk, color: 'var(--muted)', icon: '📋'};
+            html += '<div class="slbl" style="color:' + dept.color + '">' + dept.icon + ' ' + dept.label + '</div>';
+            byDept[dk].forEach(function(t) {
+              var dueStr = '';
+              if (t.due_date) {
+                var d = new Date(t.due_date);
+                var dayNames = ['Нед','Пон','Вт','Ср','Чет','Пет','Съб'];
+                dueStr = dayNames[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1<10?'0':'') + (d.getMonth()+1);
+              }
+              var isFromPortal = true;
+              html += '<div class="task bulletin" style="--tc:' + dept.color + '">' +
+                '<div class="t-chk" style="border-color:' + dept.color + ';font-size:9px;color:' + dept.color + '">П</div>' +
+                '<div class="t-body">' +
+                  '<div class="t-title">' + escHtml(t.title || '') + '</div>' +
+                  (t.description ? '<div class="t-meta">' + escHtml(t.description) + '</div>' : '') +
+                  (dueStr ? '<span class="bdg bdg-b">📅 ' + dueStr + '</span>' : '') +
+                  '<span class="bdg bdg-a" style="margin-left:3px">Портал</span>' +
+                '</div></div>';
+            });
+          });
+
+          if (taskListEl) taskListEl.innerHTML = html;
+
+          statusEl.style.display = 'none';
+          if (portalEl) portalEl.style.display = 'block';
+
+          // Also inject portal tasks into TODAY view
+          injectPortalTasksToday(portalTasks, bulWk);
+        });
+    })
+    .catch(function(err) {
+      console.error('Portal bulletin error:', err);
+      var msg = err.message || String(err);
+      if (msg.includes('abort') || msg.includes('timeout')) {
+        statusEl.innerHTML = '⏱ Таймаут — порталът не отговори. <button onclick="loadPortalBulletin()" style="border:none;background:none;color:var(--accent);cursor:pointer;font-size:12px;text-decoration:underline">Опитай пак</button>';
+      } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')) {
+        statusEl.innerHTML = '🔒 CORS грешка — добави домейна в Supabase. <a href="#" onclick="showCorsHelp()" style="color:var(--accent);font-size:12px;">Как?</a>';
+        statusEl.style.color = 'var(--amber)';
+      } else {
+        statusEl.textContent = '⚠ ' + msg.slice(0, 80);
+        statusEl.style.color = 'var(--red)';
+      }
+      statusEl.style.display = 'block';
+    });
+}
+
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function injectPortalTasksToday(tasks, bulletinWeek) {
+  // Only inject if we're in the right week
+  var now = new Date();
+  var currentWeek = getWeekNum(now);
+  if (bulletinWeek && bulletinWeek !== currentWeek) return;
+
+  var dow = now.getDay();
+  var dayISO = now.toISOString().slice(0,10);
+
+  // Map day of week to ISO date for matching
+  var DAY_MAP = {1:'mon',2:'tue',3:'wed',4:'thu',5:'fri'};
+
+  // Filter tasks due today OR that have no due_date (show every day)
+  var todayTasks = tasks.filter(function(t) {
+    if (!t.due_date) return dow >= 1 && dow <= 5; // show Mon-Fri if no due date
+    return t.due_date === dayISO;
+  });
+
+  if (!todayTasks.length) return;
+
+  // Store as bulletin tasks for today's view
+  var portalBulletinItems = todayTasks.map(function(t, i) {
+    var dept = DEPT_LABELS[t.department] || {label:'Портал',color:'var(--amber)'};
+    return {
+      id: 'portal-' + t.id,
+      t: t.title || '',
+      m: (t.description || '') + (t.description ? ' · ' : '') + dept.icon + ' ' + dept.label,
+      c: 'a',
+      bl: 'Бюлетин',
+      bulletin: true
+    };
+  });
+
+  // Add to bulletin array (avoid duplicates)
+  var existingIds = bulletin.map(function(b) { return b.id || b.text; });
+  portalBulletinItems.forEach(function(item) {
+    var exists = bulletin.some(function(b) { return b.id === item.id; });
+    if (!exists) bulletin.push({day: DAY[dow] || 'Понеделник', text: item.t, id: item.id, fromPortal: true});
+  });
+
+  renderToday();
+}
+
+// Load bulletin data on startup (silently)
+window.addEventListener('load', function() {
+  setTimeout(loadPortalBulletin, 1500); // slight delay so app loads first
+});
+
+// ── AUTO RESET bulletin tasks from portal on week change ────────────
+// (already handled by Sunday midnight reset above)
+
 function toast(msg) {
   const el=document.getElementById('toast');
   el.textContent=msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'), 2000);
 }
 
-// Auto-reset at midnight
+// ── JOKER DATA ─────────────────────────────────────────────────────
+const JOKERS = {
+  j1: {
+    title:'📋 Разлики при прием от доставчик',
+    color:'var(--red)',
+    storageKey:'joker-j1',
+    sections:[
+      {title:'1. ПРИЕМАНЕ (до 3 дни)', steps:[
+        'При липса на стокова разписка — спри приема и се свържи с Ц.Тенева',
+        'Провери за липсващ артикул (физически го няма)',
+        'Провери за излишък (физически има, но без ВД)',
+        'Провери за грешен артикул (не е поръчван)',
+        'Провери за увредена стока / липсващи части',
+        'Провери за грешен баркод / етикет',
+      ]},
+      {title:'2. ДЕЙСТВИЯ В ДЕНЯ НА ДОСТАВКАТА', steps:[
+        'НОВ имейл — за всяка поръчка ОТДЕЛНО',
+        'Тема: [Номер поръчка] - РАЗЛИКИ',
+        'Получатели: c.teneva@temax.bg + снабдител + счетоводител',
+        'Прикачи: стокова разписка + попълнена бланка с разлики',
+        'При увредена стока / липси / грешен баркод — прикачи СНИМКИ',
+      ]},
+      {title:'3. СЛЕД ОБРАБОТВАНЕ ОТ ЦО', steps:[
+        'Излишък: Върни на доставчика — протокол + ИД',
+        'Липса: Изпиши с ИД (ако артикулът е в документа)',
+        'Сторно (грешен прием): незабавен имейл до c.teneva + m.pavlova @temax.bg',
+        'Възстановена стока (доставена по-късно): уведоми Цветелина веднага',
+      ]},
+      {title:'4. ФИЗИЧЕСКО ВРЪЩАНЕ И АРХИВ', steps:[
+        'Върни артикулите (куриер/представител) с протокол по образец',
+        'Запази приемо-предавателния протокол + товарителницата',
+        'Изпрати сканирано копие до Цветелина Тенева',
+      ]},
+      {title:'5. КОНТРОЛ И СРОКОВЕ', steps:[
+        'Актуализирай справка „стока за изтегляне по разлики"',
+        'Стоката в обекта >14 дни? → Пиши на Цветелина',
+        'Провери: всички документи в системата статус „С"',
+      ]},
+    ],
+    link:{url:'https://1drv.ms/x/c/628a7cb85bc75de8/EdOkPiIQSt1EmHBEyW0NC5wBGc4OuirZ6EyYzk9dGuu62A?e=DMVBmR', label:'ОТВОРИ СПРАВКА — Стока за изтегляне по разлики'},
+    warn:'НЕ приемай, лепи етикети или пускай в зала стока без одобрение от ЦО. НЕ въвеждай неприети артикули в търговската зала.',
+  },
+  j2: {
+    title:'🔄 Разлики при междускладови трансфери',
+    color:'var(--amber)',
+    storageKey:'joker-j2',
+    sections:[
+      {title:'1. ПРИЕМАНЕ (до 3 дни)', steps:[
+        'Приеми стоката физически и в системата',
+        'Недоставен артикул (липсва физически)',
+        'Излишък (получен в повече, без ВД)',
+        'Разлика от фабрична опаковка (кашонът ≠ съдържанието)',
+        'Увредена стока / липсват части — СНИМКИ!',
+        'Грешен баркод / етикет / описание — СНИМКИ!',
+        'Сходен артикул (различен цвят/размер)',
+      ]},
+      {title:'2. ПОДАВАНЕ НА РАЗЛИКА', steps:[
+        'Попълни бланка разлики по образец',
+        'Изпрати мейл до обекта ИЗПРАЩАЧ с прикачена бланка',
+      ]},
+      {title:'3. ДЕЙСТВИЯ СПОРЕД ВИДА', steps:[
+        'Недостиг: изчакай отговор от изпращача',
+        'Излишък: провери за неприети А/В в VL06I → заявка тип 4 в ZSTR',
+        'Излишък без наличност: пиши на minus@temax.bg',
+        'Разлика фабрична опаковка: мейл до m.pavlova@temax.bg + СНИМКИ',
+        'Увредена стока: мейл до изпращача + СНИМКИ',
+        'Грешен баркод: мейл до j.jeliazkov@temax.bg и m.pavlova@temax.bg + СНИМКИ',
+        'Сходни артикули: приеми по документ → мейл до m.pavlova за ZPACK',
+      ]},
+      {title:'4. КОНТРОЛ И СТАТУС', steps:[
+        'Провери: всички документи статус „С"',
+        'Стари А/В — избягвай!',
+        'Актуализирай справка „стока на път"',
+      ]},
+    ],
+    link:{url:'https://onedrive.live.com/edit?id=628A7CB85BC75DE8!sfe549d82b3224008bc77be9360764c00&resid=628A7CB85BC75DE8!sfe549d82b3224008bc77be9360764c00&cid=628a7cb85bc75de8&ithint=file%2Cxlsx&migratedtospo=true&wdo=2', label:'ОТВОРИ СПРАВКА — Стока на път'},
+    warn:'Не оставяй статус А или В. Комуникирай с изпращача до 3 дни. Заявките за корекция — тип 4.',
+  },
+  j3: {
+    title:'↩ Връщане на стока към доставчици',
+    color:'var(--green)',
+    storageKey:'joker-j3',
+    sections:[
+      {title:'1. ВИДОВЕ ВРЪЩАНИЯ', steps:[
+        'Рекламации осветление (до 10-то число)',
+        'Сезонни артикули',
+        'Артикули с изтекъл срок',
+        'Замяна на номенклатура',
+        'Рекламации с директна замяна (n.avramova / c.teneva @temax.bg)',
+      ]},
+      {title:'2. ПОДГОТОВКА И ПРОВЕРКА', steps:[
+        'Събери стоката',
+        'Провери: описание, опаковка, наличност',
+        'Провери в ZINVCHECK',
+      ]},
+      {title:'3. ПОДАВАНЕ В ZINVCOUNT', steps:[
+        'Отвори ZINVCOUNT',
+        'Референция: „Връщане към доставчик"',
+        'Въведи количество и коментар',
+        'При грешка — нулирай количеството',
+        'НЕ качвай заедно с ревизия за осчетоводяване!',
+      ]},
+      {title:'4. ФИЗИЧЕСКО ВРЪЩАНЕ', steps:[
+        'Определи начин: куриер / представител',
+        'Попълни протокол по образец',
+        'Прикачи документи и запази копие',
+      ]},
+      {title:'5. ФИНАЛИЗИРАНЕ', steps:[
+        'Актуализирай „Обобщен списък — стока за връщане"',
+        'При получаване на ИД — провери',
+        'При разминаване — сигнализирай веднага',
+      ]},
+    ],
+    link:{url:'https://onedrive.live.com/:x:/g/personal/628a7cb85bc75de8/IQBxm1kh0GftQL4SEjMGcUw1Abrng5urG9_LfB_xH1Dn7ys?rtime=KS9LIPeA3kg', label:'ОТВОРИ — Обобщен списък стока за връщане'},
+    warn:'Винаги проверявай в ZINVCHECK. Рекламации осветление — до 10-то число. При грешка — нулирай количеството.',
+  },
+  j4: {
+    title:'📦 Прием на стока',
+    color:'var(--blue)',
+    storageKey:'joker-j4',
+    sections:[
+      {title:'0. ПАЛЕТИ (само за тези доставчици)', steps:[
+        'Оргахим — код 41247',
+        'Интер Керамик — код 66740',
+        'Боро Теракол — код 92373',
+        'Сен Гобен (само Вебер) — код 73869',
+      ]},
+      {title:'1. НАМИРАНЕ НА ДОСТАВКАТА', steps:[
+        'Отвори VL06I → Всички селекции → въведи обекта → Изпълнение',
+        'За трансфери: ZDELIV → въведи номера на стоковата разписка',
+        'Остави „Дата на доставка" празна',
+      ]},
+      {title:'2. ПРОВЕРКА ПО ТОВАРИТЕЛНИЦА', steps:[
+        'Запиши очаквания брой пакети от товарителницата',
+        'Преброй получените кашони при разтоварване',
+        'При липса на пакет — свържи се с куриера/доставчика',
+        'Приеми стоката само след получаване на всички пакети',
+      ]},
+      {title:'3. ПРИЕМ С МОБИЛНО (скенер)', steps:[
+        'Увери се, че скенерът е свързан с Wi-Fi',
+        'SAP NetWeaver → Chrome → Скан Вход Доставка',
+        'Въведи номера (180...) → Enter → сканирай → F5',
+        'Отвори ZGRPOST на компютъра → въведи доставката → POST',
+        'Запиши номера на протокола (5000...)',
+      ]},
+      {title:'4. РЪЧЕН ПРИЕМ (MIGO)', steps:[
+        'MIGO → A01 Получаване → R04 Входяща доставка',
+        'Въведи номера → Enter → въведи реалните количества',
+        'Натисни Запис → разпечатай документа',
+      ]},
+      {title:'5. ОТПЕЧАТВАНЕ НА ПРОТОКОЛ (ППП)', steps:[
+        'MIGO → Показване → въведи номера → постави „Отделна складова разписка"',
+        'MB90 → въведи документа → Изпълнение → Процес → Отпечатване сега → Печат',
+      ]},
+      {title:'6. КОНТРОЛ И СТАТУС', steps:[
+        'Провери в VL06I — доставката трябва да е статус С',
+        'Всички палети осчетоводени (ако има)',
+        'Приетата стока в търговска зала с етикети',
+      ]},
+    ],
+    warn:'Не приемай стока без документ. Не въвеждай в зала без одобрение от ЦО. При увредена стока или липси — снимките са задължителни!',
+  },
+};
+
+// ── TEAM DATA ──────────────────────────────────────────────────────
+const TEAM = [
+  {
+    pos:'Управител магазин', code:'1420 3004', color:'var(--red)',
+    sub:'Пряко подчинен на: Регионален мениджър',
+    duties:[
+      'Организира, ръководи и контролира дейността в обекта и склада',
+      'Отговаря за брак, консумативи, преоценки, обратни движения, ревизии',
+      'Прави подбор на служители и обучения на персонала',
+      'Поддържа изрядна търговска зала и документация (ДАМТН и др.)',
+      'Месечен отчет: ревизии, разходи, персонал, оборот',
+      'Изготвя месечен график за работните смени',
+      'Провежда инструктажи по безопасност на труда',
+      'Разпределя задачи от седмичния бюлетин и ЦО имейли',
+      'Представлява фирмата пред контролни органи',
+    ],
+    resp:'Носи пълна материална отговорност за стоково-паричните запаси',
+  },
+  {
+    pos:'Мениджър търговска зала (ОТЗ)', code:'5131 2005', color:'var(--amber)',
+    sub:'Пряко подчинен на: Управител. Замества управителя в отсъствие.',
+    duties:[
+      'Координира персонала в зала — дневни и седмични ангажименти',
+      'Изготвя дневен план за работа',
+      'Следи за приета, но неизложена стока — анализ ZITRATIO',
+      'Отговаря за промо зони и промо коридор',
+      'Проверява ежедневните задачи на ръководители сектори',
+      'Следи за спазване на графика на персонала',
+      'Изготвя и попълва Контролна карта на обекта',
+      'Сигнализира управителя при нарушения',
+    ],
+    resp:'Носи лична и солидарна материална отговорност',
+  },
+  {
+    pos:'Ръководител сектор', code:'1219 6019', color:'var(--blue)',
+    sub:'Пряко подчинен на: Управител. Замества се от управител / мениджър ОТЗ.',
+    duties:[
+      'Организира, ръководи и контролира персонала в поверените сектори',
+      'Следи за подредба и обслужване на клиенти',
+      'Участва в планиране и изготвяне на инвентаризации',
+      'Прави ежедневни списъци задачи за следващ ден',
+      'Отговаря за обучението на поверения персонал',
+      'Взема участие в онлайн и присъствени обучения',
+      'Отговаря за чистотата на сектора и мострите',
+    ],
+    resp:'Носи пълна отговорност за изпълнение на всички задължения',
+  },
+  {
+    pos:'Продавач-консултант', code:'5223 2001', color:'var(--green)',
+    sub:'Пряко подчинен на: Началник склад / Ръководител ТЕ',
+    duties:[
+      'Посреща и обслужва клиенти, консултира по изисквания',
+      'Познава местоположението на всички продуктови групи',
+      'Следи за срока на годност в поверения район',
+      'Подрежда артикули на предварително определени места',
+      'Участва в инвентаризации и етикетиране',
+      'Презентира мостри (машини, душ кабини, плочки, осветление и др.)',
+      'Поддържа хигиена и добър търговски вид в района',
+    ],
+    resp:'Носи лична и солидарна материална отговорност',
+  },
+  {
+    pos:'Главен касиер', code:'2631 5030', color:'var(--amber)',
+    sub:'Пряко подчинен на: Управител',
+    duties:[
+      'Извършва касови операции и води отчетна документация',
+      'Организира и контролира касиер-информаторите',
+      'Подготвя и изпраща документация към ЦО',
+      'Изготвя графика за транспорт (онлайн таблица — ежедневно)',
+      'Подготвя и разпечатва етикети за сменени цени / промоции',
+      'Изготвя справка сторна и отстъпки → ЦО',
+      'Поддържа минималната касова наличност',
+      'Включва музиката в обекта ежедневно',
+    ],
+    resp:'Носи лична и солидарна материална отговорност за паричните средства',
+  },
+  {
+    pos:'Касиер-информатор', code:'5230 1001', color:'var(--muted)',
+    sub:'Пряко подчинен на: Главен касиер и Управител',
+    duties:[
+      'Извършва касови операции по приходно-разходни документи',
+      'Приема, съхранява и предава парични средства',
+      'Упражнява вътрешен финансов контрол',
+      'Обслужва служебен телефон при клиентски запитвания',
+      'Изготвя транспортен график (онлайн таблица) ежедневно',
+      'Подготвя и разпечатва промоционални етикети',
+      'Приема рекламации и проследява изпълнението им',
+    ],
+    resp:'Отговаря за съхраняваните парични средства в касата',
+  },
+  {
+    pos:'Началник склад', code:'4321 2021', color:'var(--blue)',
+    sub:'Пряко подчинен на: Управител. Ръководи: складови работници, мотокаристи, шофьори.',
+    duties:[
+      'Организира, ръководи и контролира дейността в склада',
+      'Отговаря за приемане и издаване на стока от склада',
+      'Контролира заявки към доставчици',
+      'Поддържа чистота и подреденост на складовите площи',
+      'Участва в инвентаризации',
+      'Следи транспортния график на доставки',
+      'Обучава персонала в склада',
+    ],
+    resp:'Носи пълна материална отговорност за стоково-паричните запаси',
+  },
+  {
+    pos:'Водач мотокар', code:'8344 2004', color:'var(--muted)',
+    sub:'Пряко подчинен на: Управител на склада',
+    duties:[
+      'Проверява състоянието на мотокара преди работа',
+      'Управлява мотокара при товарене и разтоварване',
+      'Подрежда стоката в склада по видове',
+      'Два пъти месечно подменя филтри и измива двигателя',
+      'При повреди — взема мерки за незабавното им отстраняване',
+      'След работа зарежда, почиства и измива мотокара',
+    ],
+    resp:'Носи материална отговорност за мотокара и товарите',
+  },
+  {
+    pos:'Хигиенист', code:'9112 0004', color:'var(--muted)',
+    sub:'Пряко подчинен на: Началник склад / Управител',
+    duties:[
+      'Почистване на работни помещения и офиси',
+      'Помитане и влажно забърсване на подови настилки',
+      'Почистване на стъкла и витрини',
+      'Почистване и дезинфекциране на санитарните помещения',
+      'Събиране и изхвърляне на отпадъци',
+      'Зарежда санитарно-хигиенни материали',
+    ],
+    resp:'Отговаря за своевременно и качествено изпълнение',
+  },
+  {
+    pos:'Регионален мениджър', code:'1120 7045', color:'var(--accent)',
+    sub:'Пряко подчинен на: Управител на дружеството',
+    duties:[
+      'Ежедневен контакт с управителите на поверените обекти',
+      'Следи за изпълнение на всички фирмени процедури',
+      'Следи за изпълнение на цели, таргети и KPI',
+      'Изготвя контролни карти и фото отчети при посещения',
+      'Докладва на прекия ръководител за нередности',
+      'Спазва и поддържа добър търговски вид в поверения район',
+    ],
+    resp:'Отговаря за финансовата дисциплина и инвентаризациите в поверените обекти',
+  },
+];
+
+// ── JOKER FUNCTIONS ────────────────────────────────────────────────
+function showJoker(id) {
+  const j = JOKERS[id];
+  if (!j) return;
+  const stored = JSON.parse(localStorage.getItem(j.storageKey) || '{}');
+
+  let html = `<div style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:15px;font-weight:500;color:${j.color}">${j.title}</div>
+    <button onclick="resetJoker('${id}')" style="padding:5px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font)">↺ Нулирай</button>
+  </div>`;
+
+  let stepIdx = 0;
+  j.sections.forEach((sec, si) => {
+    html += `<div class="slbl">${sec.title}</div>`;
+    sec.steps.forEach((step, sti) => {
+      const key = `${si}-${sti}`;
+      const isDone = !!stored[key];
+      html += `<div class="task${isDone?' done':''}" style="--tc:${j.color}" onclick="toggleJokerStep('${id}','${key}')">
+        <div class="t-chk">${isDone?'✓':''}</div>
+        <div class="t-body"><div class="t-title">${step}</div></div>
+      </div>`;
+      stepIdx++;
+    });
+  });
+
+  if (j.link) {
+    html += `<div style="margin-top:12px;padding:10px 12px;background:rgba(91,155,213,.1);border:1px solid rgba(91,155,213,.3);border-radius:var(--r)">
+      <a href="${j.link.url}" target="_blank" style="color:var(--blue);font-size:12px;text-decoration:none;font-weight:500">🔗 ${j.link.label}</a>
+    </div>`;
+  }
+  if (j.warn) {
+    html += `<div class="warn-box" style="margin-top:10px">⚠ ${j.warn}</div>`;
+  }
+
+  document.getElementById('joker-content').innerHTML = html;
+}
+
+function toggleJokerStep(jokerId, key) {
+  const j = JOKERS[jokerId];
+  const stored = JSON.parse(localStorage.getItem(j.storageKey) || '{}');
+  stored[key] = !stored[key];
+  if (!stored[key]) delete stored[key];
+  localStorage.setItem(j.storageKey, JSON.stringify(stored));
+  showJoker(jokerId);
+}
+
+function resetJoker(id) {
+  localStorage.removeItem(JOKERS[id].storageKey);
+  showJoker(id);
+  toast('↺ Жокерът е нулиран');
+}
+
+// ── TEAM FUNCTIONS ─────────────────────────────────────────────────
+function renderTeam(filter='') {
+  const fl = filter.toLowerCase();
+  const filtered = TEAM.filter(t =>
+    !fl || t.pos.toLowerCase().includes(fl) ||
+    t.duties.some(d => d.toLowerCase().includes(fl))
+  );
+  let html = '';
+  filtered.forEach(t => {
+    const id = 'tc-'+t.code.replace(/\s/g,'');
+    html += `<div class="sap-card" id="${id}">
+      <div class="sap-hd" onclick="toggleSap('${id}')">
+        <div class="sap-tx">
+          <span style="width:12px;height:12px;border-radius:50%;background:${t.color};flex-shrink:0;display:inline-block;margin-right:4px"></span>
+          <span class="sap-name" style="font-weight:500">${t.pos}</span>
+        </div>
+        <span class="sap-arr">▶</span>
+      </div>
+      <div class="sap-body">
+        <div class="sap-desc" style="color:var(--muted);font-family:var(--mono);font-size:11px">НКПД: ${t.code} · ${t.sub}</div>
+        <div class="slbl" style="margin-top:10px">Основни задължения</div>
+        <div class="step-list">`;
+    t.duties.forEach((d,i) => {
+      html += `<div class="step-item"><div class="step-num">${i+1}</div><div class="step-txt">${d}</div></div>`;
+    });
+    html += `</div>
+        <div class="tip-box" style="margin-top:8px">📋 ${t.resp}</div>
+      </div>
+    </div>`;
+  });
+  if (!html) html = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">Няма резултати</div>';
+  document.getElementById('team-list').innerHTML = html;
+}
+function filterTeam(v) { renderTeam(v); }
+
+
+
 setInterval(()=>{
   const n=new Date();
   if (n.getHours()===0&&n.getMinutes()===0) {
