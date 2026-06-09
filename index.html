@@ -654,7 +654,7 @@ function updateHeader() {
 function highlightToday() {
   const d = new Date().getDay();
   const m = {1:'dc-1',2:'dc-2',3:'dc-3',4:'dc-4',5:'dc-5'};
-  if (m[d]) document.getElementById(m[d])?.classList.add('today');
+  if (m[d]) { var el=document.getElementById(m[d]); if(el) el.classList.add('today'); }
 }
 
 // ── NAV ────────────────────────────────────────────────────────────
@@ -877,7 +877,7 @@ function scheduleReminders() {
     if (!undone.length) return;
     const labels={8:'Сутрешни задачи',14:'Следобедни задачи',17:'Краен преглед'};
     const ids={8:'r1',14:'r2',17:'r3'};
-    if (labels[h] && document.getElementById(ids[h])?.checked) {
+    var _cb=document.getElementById(ids[h]); if (labels[h] && _cb && _cb.checked) {
       new Notification('ТеМАХ РМ — '+labels[h], {
         body: undone.length+' незавършени задачи за '+DAY[dow],
         tag:'temax-'+h
