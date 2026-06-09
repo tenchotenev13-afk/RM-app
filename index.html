@@ -837,16 +837,21 @@ function checkNotif() {
     el.textContent='Не са активирани — натисни бутона по-долу';
   }
 }
-async function reqNotif() {
+function reqNotif() {
   if (!('Notification' in window)) return toast('Браузърът не поддържа нотификации');
-  const p = await Notification.requestPermission();
-  if (p==='granted') {
-    document.getElementById('notif-btn').classList.add('on');
-    toast('✓ Нотификациите са активирани');
-    checkNotif();
-    setTimeout(()=> new Notification('ТеМАХ РМ ✓',{body:'Готово! Ще получаваш напомняния за задачите.'}), 400);
-  } else toast('Нотификациите бяха отказани');
+  Notification.requestPermission().then(function(p) {
+    if (p==='granted') {
+      document.getElementById('notif-btn').classList.add('on');
+      toast('✓ Нотификациите са активирани');
+      checkNotif();
+      scheduleReminders();
+      setTimeout(function() { new Notification('ТеМАХ РМ ✓',{body:'Готово! Ще получаваш напомняния за задачите.'}); }, 400);
+    } else {
+      toast('Нотификациите бяха отказани');
+    }
+  });
 }
+
 function toggleNotif() {
   if (Notification.permission!=='granted') reqNotif();
   else nav('settings', document.querySelectorAll('.nav-btn')[5]);
