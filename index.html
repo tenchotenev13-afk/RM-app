@@ -335,7 +335,7 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
     <div class="s-row" style="border:none;padding:5px 0"><div><div class="s-lbl" style="font-size:12px">17:00 — Краен преглед</div></div><label class="toggle"><input type="checkbox" id="r3" checked><span class="slider"></span></label></div>
   </div>
   <button class="btn-p" onclick="reqNotif()">🔔 Активирай нотификации</button>
-  <button class="btn-s" onclick="testNotif()">Тест нотификация</button>
+  <button class="btn-s" onclick="diagNotif()">Тест нотификация</button>
   <div class="slbl">Нотификации — как да разрешиш</div>
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;font-size:12px;line-height:1.8">
     <div style="margin-bottom:8px;color:var(--text);font-weight:500">Android Chrome:</div>
@@ -857,6 +857,35 @@ function toggleNotif() {
   else nav('settings', document.querySelectorAll('.nav-btn')[5]);
 }
 function toggleNotifSetting(on) { if (on && Notification.permission!=='granted') reqNotif(); }
+function diagNotif() {
+  // Step 1: check API exists
+  if (!('Notification' in window)) {
+    alert('Браузърът не поддържа нотификации');
+    return;
+  }
+  // Step 2: check permission
+  var perm = Notification.permission;
+  if (perm === 'denied') {
+    alert('Нотификациите са БЛОКИРАНИ в браузъра.\n\nРешение:\n1. Натисни иконката 🔒 в адресната лента\n2. Нотификации → Разреши\n3. Презареди страницата');
+    return;
+  }
+  if (perm !== 'granted') {
+    alert('Нотификациите не са разрешени. Натисни "Активирай нотификации" първо.');
+    return;
+  }
+  // Step 3: try to show notification
+  try {
+    var n = new Notification('ТеМАХ РМ — Тест', {
+      body: 'Нотификациите работят! ' + new Date().toLocaleTimeString('bg-BG'),
+      requireInteraction: false
+    });
+    n.onerror = function(e) { alert('Грешка при показване: ' + JSON.stringify(e)); };
+    toast('✓ Нотификацията е изпратена');
+  } catch(e) {
+    alert('Грешка: ' + e.message);
+  }
+}
+
 function testNotif() {
   if (Notification.permission!=='granted') return toast('Първо активирай нотификациите');
   const dow = new Date().getDay();
@@ -865,7 +894,7 @@ function testNotif() {
   const msg = undone.length
     ? `${undone.length} незавършени задачи за ${DAY[dow]}`
     : '🎉 Всички задачи за днес са изпълнени!';
-  new Notification('ТеМАХ РМ — ' + DAY[dow], {body: msg, tag: 'temax-test'});
+  new Notification('ТеМАХ РМ — ' + DAY[dow], {body: msg});
 }
 function scheduleReminders() {
   if (Notification.permission!=='granted') return;
