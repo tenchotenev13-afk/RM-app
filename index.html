@@ -927,19 +927,55 @@ function testNotif() {
   showNotif('ТеМАХ РМ — ' + DAY[dow], msg);
 }
 function scheduleReminders() {
-  if (Notification.permission!=='granted') return;
-  setInterval(() => {
-    const n=new Date(), h=n.getHours(), m=n.getMinutes(), dow=n.getDay();
-    if (m!==0) return;
-    const allTasks = getTasksForNotif(dow);
-    const undone = allTasks.filter(t => !done[t.id]);
-    if (!undone.length) return;
-    const labels={8:'Сутрешни задачи',14:'Следобедни задачи',17:'Краен преглед'};
-    const ids={8:'r1',14:'r2',17:'r3'};
-    var _cb=document.getElementById(ids[h]); if (labels[h] && _cb && _cb.checked) {
-      showNotif('ТеМАХ РМ — '+labels[h], undone.length+' незавършени задачи за '+DAY[dow]);
-    }
+  if (Notification.permission !== 'granted') return;
+
+  // Use Periodic Background Sync if available (Android Chrome PWA)
+  if ('serviceWorker' in navigator && 'periodicSync' in ServiceWorkerRegistration.prototype) {
+    navigator.serviceWorker.ready.then(function(reg) {
+      reg.periodicSync.register('temax-reminder', {minInterval: 60 * 60 * 1000})
+        .then(function() { console.log('Periodic sync registered'); })
+        .catch(function(e) { console.log('Periodic sync not available:', e); fallbackReminders(); });
+    });
+  } else {
+    fallbackReminders();
+  }
+}
+
+function fallbackReminders() {
+  // Fallback: setInterval works only while app is open
+  // Check immediately on load if we missed a reminder today
+  checkMissedReminders();
+  setInterval(function() {
+    var n = new Date(), h = n.getHours(), m = n.getMinutes(), dow = n.getDay();
+    if (m !== 0) return;
+    sendReminderIfNeeded(h, dow);
   }, 60000);
+}
+
+function checkMissedReminders() {
+  // On app open, check if we should have sent a reminder already today
+  var n = new Date(), h = n.getHours(), dow = n.getDay();
+  if (dow === 0 || dow === 6) return;
+  // If opening between 08:00-14:00 and morning reminder not sent yet → send now
+  var lastSent = localStorage.getItem('tm-last-notif-day');
+  var today = n.toISOString().slice(0, 10);
+  if (lastSent === today) return; // already sent today
+  if (h >= 8) {
+    sendReminderIfNeeded(8, dow);
+    localStorage.setItem('tm-last-notif-day', today);
+  }
+}
+
+function sendReminderIfNeeded(h, dow) {
+  var labels = {8:'Сутрешни задачи', 14:'Следобедни задачи', 17:'Краен преглед'};
+  var ids = {8:'r1', 14:'r2', 17:'r3'};
+  if (!labels[h]) return;
+  var cb = document.getElementById(ids[h]);
+  if (cb && !cb.checked) return;
+  var allTasks = getTasksForNotif(dow);
+  var undone = allTasks.filter(function(t) { return !done[t.id]; });
+  if (!undone.length) return;
+  showNotif('ТеМАХ РМ — ' + labels[h], undone.length + ' незавършени задачи за ' + DAY[dow]);
 }
 
 // ── SUPABASE BULLETIN INTEGRATION ─────────────────────────────────
