@@ -163,6 +163,7 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
   <button class="nav-btn" onclick="nav('month',this)">Месец</button>
   <button class="nav-btn" onclick="nav('sap',this)">SAP</button>
   <button class="nav-btn" onclick="nav('edit',this)">✏ Бюлетин</button>
+  <button class="nav-btn" onclick="nav('process',this)">📋 Процеси</button>
   <button class="nav-btn" onclick="nav('joker',this)">🃏 Жокери</button>
   <button class="nav-btn" onclick="nav('team',this)">👥 Екип</button>
   <button class="nav-btn" onclick="nav('settings',this)">⚙</button>
@@ -188,6 +189,10 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
 <!-- WEEK -->
 <div class="panel" id="p-week">
   <div class="slbl" style="margin-top:2px">Модел на работната седмица</div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;font-size:11px;align-items:center">
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:var(--blue);display:inline-block"></span> Задача на РМ</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block"></span> Задача на Магазин</span>
+  </div>
   <div class="wk-grid">
     <div class="dc" id="dc-1"><div class="dc-hd">Понеделник</div><div class="dc-body">
       <div class="ev ev-r"><strong>Справка минуси</strong>Незакрити движения — от Даяна Иванова</div>
@@ -227,14 +232,18 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
 <!-- MONTH -->
 <div class="panel" id="p-month">
   <div class="slbl" style="margin-top:2px">Месечен ритъм</div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;font-size:11px;align-items:center">
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:var(--blue);display:inline-block"></span> Задача на РМ</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block"></span> Задача на Магазин</span>
+  </div>
   <div class="mo-grid">
     <div class="wk-card"><h3>// СЕДМ. 1 — НА МЯСТО</h3>
-      <div class="mi"><div class="dot" style="background:var(--red)"></div><div>Дневен план на обекта</div></div>
-      <div class="mi"><div class="dot" style="background:var(--red)"></div><div>Чек-листи на управителя</div></div>
-      <div class="mi"><div class="dot" style="background:var(--red)"></div><div><strong>Контролна карта 1/2</strong></div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Дневен план на обекта</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Чек-листи на управителя</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div><strong>Контролна карта 1/2</strong></div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Промозони + брошури</div></div>
-      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Подредби и стандарти</div></div>
-      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Складове + пожарна</div></div>
+      <div class="mi"><div class="dot" style="background:var(--green)"></div><div>Подредби и стандарти</div></div>
+      <div class="mi"><div class="dot" style="background:var(--green)"></div><div>Складове + пожарна</div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
@@ -253,7 +262,7 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
       <div class="mi"><div class="dot" style="background:var(--muted)"></div><div style="color:var(--muted);font-size:11px">Дистанц.: Минуси, камери, движения</div></div>
     </div>
     <div class="wk-card"><h3>// СЕДМ. 4 — НА МЯСТО</h3>
-      <div class="mi"><div class="dot" style="background:var(--red)"></div><div><strong>Контролна карта 2/2</strong></div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div><strong>Контролна карта 2/2</strong></div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Качество обслужване</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Срокове на годност</div></div>
       <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Застояла стока</div></div>
@@ -262,16 +271,16 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
   <div class="slbl">Финални месечни задачи</div>
   <div class="wk-card"><h3>// КРАЙ НА МЕСЕЦА</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
-      <div class="mi"><div class="dot" style="background:var(--red)"></div><div>Обобщение 2 карти + архив</div></div>
-      <div class="mi"><div class="dot" style="background:var(--red)"></div><div>&gt;15% разлика → план корекция</div></div>
-      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Стока на път — изчистване</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Обобщение 2 карти + архив</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>&gt;15% разлика → план корекция</div></div>
+      <div class="mi"><div class="dot" style="background:var(--green)"></div><div>Стока на път — изчистване</div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Брак и преоценка — потвърди</div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Досиета + тренинг програми</div></div>
       <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Одобри графици + отпуски</div></div>
-      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Засечка главна каса</div></div>
-      <div class="mi"><div class="dot" style="background:var(--amber)"></div><div>Консумативи, брак, движения</div></div>
-      <div class="mi"><div class="dot" style="background:var(--green)"></div><div>Подготовка следващ месец</div></div>
-      <div class="mi"><div class="dot" style="background:var(--green)"></div><div>Командировки + обучения</div></div>
+      <div class="mi"><div class="dot" style="background:var(--green)"></div><div>Засечка главна каса</div></div>
+      <div class="mi"><div class="dot" style="background:var(--green)"></div><div>Консумативи, брак, движения</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Подготовка следващ месец</div></div>
+      <div class="mi"><div class="dot" style="background:var(--blue)"></div><div>Командировки + обучения</div></div>
     </div>
   </div>
 </div>
@@ -359,6 +368,12 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
   </div>
 </div>
 
+<!-- PROCESSES -->
+<div class="panel" id="p-process">
+  <input class="sap-search" id="proc-q" placeholder="🔍  Търси процес..." oninput="filterProcess(this.value)">
+  <div id="proc-list"></div>
+</div>
+
 <!-- JOKERS -->
 <div class="panel" id="p-joker">
   <div class="slbl" style="margin-top:2px">Изберете жокер</div>
@@ -405,36 +420,36 @@ const C = {r:'var(--red)',a:'var(--amber)',b:'var(--blue)',g:'var(--green)'};
 // ── BASE TASKS (permanent, per weekday) ────────────────────────────
 const BASE = {
   1:[
-    {id:'m1',t:'Справка минуси — незакрити движения',m:'От Даяна Иванова • работи само по актуалните таблици',c:'r',bl:'Критично'},
-    {id:'m2',t:'Снимка колоранти до 11:00ч',m:'p.velikova@temax.bg — всички обекти',c:'r',bl:'Срок 11:00'},
-    {id:'m3',t:'Провери обратни движения (952/954)',m:'MB51 → завод → 951+952 → незакрити двойки = проблем',c:'b',bl:'Контрол SAP'},
-    {id:'m3b',t:'VL06I — стари А/В документи',m:'Входящи доставки без статус С от >3 дни → питай управителя',c:'r',bl:'Контрол SAP'},
-    {id:'m4',t:'Обратна връзка по задачи от бюлетина',m:'Задължително — дори „нямаме нищо за подаване"',c:'a',bl:'Комуникация'},
+    {id:'m1',t:'Справка минуси — незакрити движения',m:'От Даяна Иванова • работи само по актуалните таблици',c:'r',bl:'Критично',role:'rm'},
+    {id:'m2',t:'Снимка колоранти до 11:00ч',m:'p.velikova@temax.bg — всички обекти',c:'r',bl:'Срок 11:00',role:'rm'},
+    {id:'m3',t:'Провери обратни движения (952/954)',m:'MB51 → завод → 951+952 → незакрити двойки = проблем',c:'b',bl:'Контрол SAP',role:'rm'},
+    {id:'m3b',t:'VL06I — стари А/В документи',m:'Входящи доставки без статус С от >3 дни → питай управителя',c:'r',bl:'Контрол SAP',role:'rm'},
+    {id:'m4',t:'Обратна връзка по задачи от бюлетина',m:'Задължително — дори „нямаме нищо за подаване"',c:'a',bl:'Комуникация',role:'rm'},
   ],
   2:[
-    {id:'t1',t:'Онлайн среща с магазините',m:'Задачи от бюлетина — проверка за разбиране',c:'b',bl:'Среща'},
-    {id:'t2',t:'Справка М.Павлова — необработени заявки',m:'Реагирай веднага при открити проблеми',c:'a',bl:'Важно'},
-    {id:'t3',t:'Планирай посещение (Кърджали или Раднево)',m:'1ч път — подготви се с данни от камери и минуси',c:'g',bl:'Теренно'},
-    {id:'t4',t:'При посещение: случайна ревизия 1–3 артикула',m:'ZMB52 → провери наличност SAP vs физическа → резултат в контролна карта',c:'b',bl:'Контрол SAP'},
+    {id:'t1',t:'Онлайн среща с магазините',m:'Задачи от бюлетина — проверка за разбиране',c:'b',bl:'Среща',role:'rm'},
+    {id:'t2',t:'Справка М.Павлова — необработени заявки',m:'Реагирай веднага при открити проблеми',c:'a',bl:'Важно',role:'rm'},
+    {id:'t3',t:'Планирай посещение (Кърджали или Раднево)',m:'1ч път — подготви се с данни от камери и минуси',c:'g',bl:'Теренно',role:'rm'},
+    {id:'t4',t:'При посещение: случайна ревизия 1–3 артикула',m:'ZMB52 → провери наличност SAP vs физическа → резултат в контролна карта',c:'b',bl:'Контрол SAP',role:'rm'},
   ],
   3:[
-    {id:'w1',t:'OneDrive: Стока за връщане — попълни',m:'Задължително всяка сряда',c:'r',bl:'Срок сряда'},
-    {id:'w2',t:'OneDrive: Стока за изтегляне по разлики',m:'Задължително всяка сряда',c:'r',bl:'Срок сряда'},
-    {id:'w3',t:'Ревизии — качи до 16:00ч (пон-сряда)',m:'ZINVCHECK преди изпращане → l.vasileva / n.tudjarova / a.simeonova @temax.bg',c:'r',bl:'Срок 16:00'},
-    {id:'w4',t:'Рекламации осветление → ZINVCOUNT',m:'След осчетоводяване на ревизиите',c:'a',bl:'Важно'},
-    {id:'w5',t:'Срокове на годност — обектите качили ли са?',m:'Провери в SAP или попитай управителите',c:'a',bl:'Контрол'},
-    {id:'w6',t:'ZINVCHECK — ревизии и стока за връщане',m:'Задължително преди мейл за осчетоводяване → провери отклонения и коментари',c:'r',bl:'Контрол SAP'},
+    {id:'w1',t:'OneDrive: Стока за връщане — попълни',m:'Задължително всяка сряда',c:'r',bl:'Срок сряда',role:'mag'},
+    {id:'w2',t:'OneDrive: Стока за изтегляне по разлики',m:'Задължително всяка сряда',c:'r',bl:'Срок сряда',role:'mag'},
+    {id:'w3',t:'Ревизии — качи до 16:00ч (пон-сряда)',m:'ZINVCHECK преди изпращане → l.vasileva / n.tudjarova / a.simeonova @temax.bg',c:'r',bl:'Срок 16:00',role:'mag'},
+    {id:'w4',t:'Рекламации осветление → ZINVCOUNT',m:'След осчетоводяване на ревизиите',c:'a',bl:'Важно',role:'mag'},
+    {id:'w5',t:'Срокове на годност — обектите качили ли са?',m:'Провери в SAP или попитай управителите',c:'a',bl:'Контрол',role:'rm'},
+    {id:'w6',t:'ZINVCHECK — ревизии и стока за връщане',m:'Задължително преди мейл за осчетоводяване → провери отклонения и коментари',c:'r',bl:'Контрол SAP',role:'rm'},
   ],
   4:[
-    {id:'th1',t:'Посещение — зала, склад, промозони, обслужване',m:'Проверявай блокиращите критерии първи',c:'g',bl:'Теренно'},
-    {id:'th2',t:'Follow-up от сряда',m:'Разлики и ревизии изпратени ли са от обектите?',c:'b',bl:'Контрол'},
+    {id:'th1',t:'Посещение — зала, склад, промозони, обслужване',m:'Проверявай блокиращите критерии първи',c:'g',bl:'Теренно',role:'rm'},
+    {id:'th2',t:'Follow-up от сряда',m:'Разлики и ревизии изпратени ли са от обектите?',c:'b',bl:'Контрол',role:'rm'},
   ],
   5:[
-    {id:'f1',t:'Анализ на камери — всеки обект',m:'Опашки, оперативки, групички, анулирани бонове, зони пушене',c:'b',bl:'Контрол'},
-    {id:'f2',t:'Справка М.Павлова — 2-ра за седмицата',m:'Необработени заявки + неизписани документи',c:'a',bl:'Важно'},
-    {id:'f3',t:'Седмично обобщение: минуси + обратни движения',m:'Незатворени въпроси → план за понеделник',c:'b',bl:'Анализ'},
-    {id:'f5',t:'MB51 — провери 951/952 клиентски поръчки',m:'Незакрити двойки тази седмица → питай управителя преди уикенда',c:'b',bl:'Контрол SAP'},
-    {id:'f4',t:'Планиране следваща седмица',m:'Кой обект? Контролна карта? Специфични задачи?',c:'g',bl:'Планиране'},
+    {id:'f1',t:'Анализ на камери — всеки обект',m:'Опашки, оперативки, групички, анулирани бонове, зони пушене',c:'b',bl:'Контрол',role:'rm'},
+    {id:'f2',t:'Справка М.Павлова — 2-ра за седмицата',m:'Необработени заявки + неизписани документи',c:'a',bl:'Важно',role:'rm'},
+    {id:'f3',t:'Седмично обобщение: минуси + обратни движения',m:'Незатворени въпроси → план за понеделник',c:'b',bl:'Анализ',role:'rm'},
+    {id:'f5',t:'MB51 — провери 951/952 клиентски поръчки',m:'Незакрити двойки тази седмица → питай управителя преди уикенда',c:'b',bl:'Контрол SAP',role:'rm'},
+    {id:'f4',t:'Планиране следваща седмица',m:'Кой обект? Контролна карта? Специфични задачи?',c:'g',bl:'Планиране',role:'rm'},
   ],
 };
 
@@ -639,6 +654,8 @@ window.addEventListener('load', () => {
   updateHeader();
   renderToday();
   renderSap();
+  renderProcess();
+  renderTeam();
   renderEditList();
   highlightToday();
   checkNotif();
@@ -701,12 +718,14 @@ function renderToday() {
       const isDone = !!done[t.id];
       const bc = {r:'bdg-r',a:'bdg-a',b:'bdg-b',g:'bdg-g'}[t.c]||'';
       const bCls = t.bulletin ? ' bulletin' : '';
+      const roleBdg = t.role==='rm' ? '<span class="bdg" style="background:rgba(91,155,213,.2);color:var(--blue);margin-left:3px">РМ</span>'
+                    : t.role==='mag' ? '<span class="bdg" style="background:rgba(78,201,148,.2);color:var(--green);margin-left:3px">Магазин</span>' : '';
       html += `<div class="task${bCls}${isDone?' done':''}" style="--tc:${C[t.c]||'var(--border)'}" onclick="toggleTask('${t.id}')">
         <div class="t-chk">${isDone?'✓':''}</div>
         <div class="t-body">
           <div class="t-title">${t.t}</div>
           ${t.m?`<div class="t-meta">${t.m}</div>`:''}
-          ${t.bl&&bc?`<span class="bdg ${bc}">${t.bl}</span>`:''}
+          <div>${t.bl&&bc?`<span class="bdg ${bc}">${t.bl}</span>`:''} ${roleBdg}</div>
         </div></div>`;
     });
   }
@@ -1144,7 +1163,237 @@ function toast(msg) {
   setTimeout(()=>el.classList.remove('show'), 2000);
 }
 
-// ── JOKER DATA ─────────────────────────────────────────────────────
+// ── PROCESS DATA ───────────────────────────────────────────────────
+const PROC_DATA = [
+  {
+    code:'ПРИЕМ', name:'Прием на стока', cat:'Операции', color:'var(--blue)',
+    desc:'Приемане на стока от доставчик или трансфер от друг обект. Задължително с мобилно устройство освен плочки, ламинат, балатум.',
+    physical:[
+      'Получи стоковата разписка от шофьора — без документ НЕ приемай',
+      'Провери броя пакети/кашони по товарителницата преди разтоварване',
+      'При липса на пакет — свържи се с куриера/доставчика веднага',
+      'Отвори и провери стоката за увреждания, разлики, грешни баркоди',
+      'При разлики — снимай веднага (увредена стока, липси, грешни баркоди)',
+      'Подготви стоката за сканиране',
+    ],
+    sap:[
+      {t:'Намери входящата доставка', d:'<span class="key">VL06I</span> → За постъпление → Всички селекции → въведи обекта → Изпълни. За трансфери: <span class="key">ZDELIV</span> → въведи двата склада → намери ВД по номера на СР'},
+      {t:'Прием с мобилно устройство', d:'SAP Netweaver (Chrome) → Скан Вход Доставка → въведи номер (180...) → Enter → сканирай баркод → Enter → TAB → въведи количество → F5. Повтаряй за всеки артикул → F2 за завършване'},
+      {t:'Осчетоводи в ZGRPOST', d:'<span class="key">ZGRPOST</span> → въведи номера на ВД → Изпълни → провери количествата → POST → запиши номера (5000...)'},
+      {t:'Отпечатай протокол (ППП)', d:'<span class="key">MB90</span> → въведи номера → Изпълни → маркирай реда → Процес → Отпечатване сега → Печат'},
+      {t:'Ръчен прием (само плочки/ламинат)', d:'<span class="key">MIGO</span> → A01 Получаване → R04 Входяща доставка → въведи ВД → въведи количества → OK → Осчетоводи'},
+      {t:'Провери статус', d:'<span class="key">VL06I</span> → ВД трябва да е статус С. Статус А или В = незатворена = проблем'},
+    ],
+    warn:'Приетата стока ЗАДЪЛЖИТЕЛНО влиза в зала с етикети и ППП. Не въвеждай в зала стока без одобрение от ЦО.',
+  },
+  {
+    code:'МИНУСИ', name:'Минуси от продажби', cat:'Операции', color:'var(--red)',
+    desc:'Ежедневно в 13:53, 15:53 и 22:53 системата генерира минуси — артикули маркирани на каса с нулева наличност. Осчетоводяват се до 8:30 на следващия ден.',
+    physical:[
+      'Вземи справката с минусите от системата',
+      'Провери всеки артикул — какъв е реално даденият на клиента',
+      'Попълни жълтите колони: реален артикул, причина, виновен служител',
+      'Изпрати справката до minus@temax.bg',
+    ],
+    sap:[
+      {t:'Провери минусите', d:'Зареди транзакцията за минуси → бутон → показва код на магазин, дата, САП код, количество'},
+      {t:'Осчетоводи с 953 (или 951)', d:'<span class="key">MIGO</span> → A01 Получаване → R10 Други → движение <span class="key">953</span> (или 951 за клиентски поръчки) → въведи артикул, количество, завод, склад 1000 → Осчетоводи'},
+      {t:'Смени датата!', d:'За минуси от 22:53 — задължително смени датата на документа на ПРЕДНИЯ ден преди осчетоводяване'},
+      {t:'Изпрати справката', d:'MB51 → завод (двата кода) → движение 951+953 → дата вчера → Изпълни → Електронна таблица → импортирай в Excel → попълни жълтите колони → изпрати до minus@temax.bg'},
+      {t:'Провери обратни движения', d:'<span class="key">MB51</span> → движения 951+952 → всяка двойка трябва да е с равни количества и сума = 0. Незакрити = проблем'},
+    ],
+    warn:'Смяна на датата за минусите от 22:53 е ЗАДЪЛЖИТЕЛНА. За всички документи 951/953 — обратните 952/954 трябва да са направени след осигуряване на наличност.',
+    tip:'Всяка седмица пон-сряда се качват ревизии на групите с 953 за затваряне на незакритите движения.',
+  },
+  {
+    code:'РЕВИЗИИ', name:'Инвентаризации / ревизии', cat:'Операции', color:'var(--amber)',
+    desc:'Ревизии задължително с мобилно устройство. Изключение: плочки, ламинат, мокет, балатум — директно в ZINVCOUNT или с Excel темплейт.',
+    physical:[
+      'Извади списък с наличности от ZMB52 или ZMATERIALS (включително без наличност)',
+      'Отпечатай списъка — остави баркода видим за сравнение при броене',
+      'Сортирай стоката по групи преди броене',
+      'Пребройте физически — запишете количествата',
+      'При разлики — провери отново преди качване в системата',
+    ],
+    sap:[
+      {t:'Сканирай с мобилно', d:'SAP Netweaver → Скан инвентаризация → Създаване нов опис → Реф (макс 15 символа!) → Enter → сканирай баркод → Enter → въведи количество → F5 → повтаряй → F2 за завършване'},
+      {t:'Корекция на опис', d:'Скан инвентаризация → Корекция на опис → въведи НОМЕРА на описа (не референцията!) → сканирай артикула → коригирай → F5 → F2'},
+      {t:'Директно в SAP / Excel', d:'<span class="key">ZINVCOUNT</span> → магазин → статус Нов → Изпълни → Нов опис → попълни референция → въведи SAP кодове → преброени количества → Запис. Или: Нов опис → Импорт от Excel (3 колони: референция, SAP код, количество)'},
+      {t:'Провери преди осчетоводяване', d:'<span class="key">ZINVCHECK</span> → въведи магазина → Изпълни → провери колоните: преброено, текуща наличност, отклонение. Малки отклонения (0.05, 0.1) → НЕ осчетоводявай → сигнализирай М.Павлова'},
+      {t:'Коригирай грешки', d:'Грешно количество → ZINVCOUNT → зареди описа → Редакция → промени → Запис → провери пак в ZINVCHECK. Анулиране на артикул → ZINVCHECK → зелена колона → чекче → Анулиране на преброяване'},
+      {t:'Изпрати мейл за осчетоводяване', d:'Само след успешна проверка в ZINVCHECK → до l.vasileva / n.tudjarova / a.simeonova @temax.bg'},
+    ],
+    warn:'Корекции след изпратен мейл за осчетоводяване са ЗАБРАНЕНИ. Прием на артикули от ревизирана група е забранен от качване до получаване на потвърждение от счетоводството.',
+    tip:'Осчетоводените отклонения се виждат в MB51 движение 301. Когато преброено = наличност, в MB51 НЕ се отразява движение.',
+  },
+  {
+    code:'ИЗПИСВАНЕ', name:'Изписване / трансфери', cat:'Операции', color:'var(--green)',
+    desc:'Изписване при трансфер към друг обект или връщане към доставчик. Стоки с баркод ЗАДЪЛЖИТЕЛНО с мобилно устройство.',
+    physical:[
+      'Обработи заявката в ZSTO — системата генерира Складова разписка (СР)',
+      'По СР събери физически стоката',
+      'Стоката на палет/кашон — придружи с документ: „От ТеМАХ [от] за ТеМАХ [до], СР номер/дата"',
+      'Сканирай стоката с мобилното преди изпращане',
+    ],
+    sap:[
+      {t:'Обработи заявката', d:'<span class="key">ZSTO</span> → виждаш необработени заявки → селектирай ред → Process → системата генерира СР и изходяща доставка'},
+      {t:'Сканирай с мобилно', d:'SAP Netweaver → Скан Изход Доставка → въведи номера на изх.доставка → Enter → сканирай баркод → Enter → TAB за количество → F5 → повтаряй → F7 за изход от доставката'},
+      {t:'Осчетоводи в ZGIPOST', d:'<span class="key">ZGIPOST</span> → въведи номера на изх.доставка → Изпълни → провери данните → можеш да коригираш в „Целево количество" → POST'},
+      {t:'Ръчно изписване (плочки/ламинат)', d:'<span class="key">VL02N</span> → въведи номера на СР → Продължаване → Осчет.Изписв.Стоки → разпечатай Стоковата разписка'},
+      {t:'Провери статус', d:'<span class="key">VL06O</span> → За отпускане → всички изходящи доставки трябва да са затворени'},
+    ],
+    warn:'Не се позволява частично изписване! При сканиране на по-малко — системата автоматично коригира целия документопоток.',
+  },
+  {
+    code:'ДВИЖЕНИЯ', name:'Материални движения (брак, кражби, консумативи)', cat:'Операции', color:'var(--muted)',
+    desc:'Всички материални движения се осчетоводяват в MIGO. Проверявай винаги кое движение е заредила транзакцията преди въвеждане на артикули.',
+    physical:[
+      'За брак — попълни бланка с причина за всеки артикул',
+      'За брак и кражби — снимай в папката на магазина (отделна папка с дата и номер на документа)',
+      'За брак след рекламация — задължително становище от сервиз с протокол номер/дата',
+    ],
+    sap:[
+      {t:'Консумативи (901/903/905)', d:'<span class="key">MIGO</span> → A07 Изписване → R10 Други → движение 901/903/905 → Текст „ВЪТРЕШНИ НУЖДИ" → артикули → разходен център = код на завода → Проверка → Осчетоводи'},
+      {t:'Кражби (963)', d:'<span class="key">MIGO</span> → A07 → R10 → движение <span class="key">963</span> → Текст „Кражба м.Януари" → артикул → Текст позиция: „празна опаковка" → Проверка → Осчетоводи. Снимки в папка с номер на документа'},
+      {t:'Брак (551)', d:'<span class="key">MIGO</span> → A07 → R10 → движение <span class="key">551</span> → артикул → количество → завод → склад 1000 → Текст: причина подробно → Причина за движение (1-повредена/2-срок/3-залежала/4-лош вид) → БЕЗ разходен център! → Осчетоводи'},
+    ],
+    warn:'За 551 (брак) — вече БЕЗ разходен център! При написан разходен център движението е грешно. Пишете подробни бележки — „счупено" не е достатъчно.',
+  },
+  {
+    code:'ВРЪЩАНЕ', name:'Връщане на стока към доставчик', cat:'Операции', color:'var(--green)',
+    desc:'Всяка сряда — качване на стока за връщане в ZINVCOUNT. Физическо изпращане от 1-во до 10-то число (осветление), или по договорен график.',
+    physical:[
+      'Събери стоката по вид: рекламации осветление, сезонна, изтекъл срок, замяна номенклатура',
+      'Провери всеки артикул — баркод, опаковка, срок, рекламационен протокол',
+      'Подготви за изпращане: опакована стока + протокол по образец',
+      'Определи начин: куриер (за сметка на доставчика) или техен представител',
+      'Запази приемо-предавателния протокол + товарителницата за архив',
+      'Изпрати сканирано копие до Цветелина Тенева',
+    ],
+    sap:[
+      {t:'Качи в ZINVCOUNT', d:'<span class="key">ZINVCOUNT</span> → магазин → Нов → Нов опис → Референция: „Връщане към доставчик" → въведи артикулите → Количество → Коментар: причина (срок, рекламация) → Запис'},
+      {t:'При грешно качен артикул', d:'Нулирай количеството на 0 → или ZINVCHECK → зелена колона → анулирай реда с чекче'},
+      {t:'Провери преди мейл', d:'<span class="key">ZINVCHECK</span> → провери наличност и отклонение → само след OK изпрати мейл'},
+      {t:'Актуализирай OneDrive справката', d:'Всяка сряда → линк от бюлетина → „Обобщен списък — стока за връщане" → актуализирай взето/невзето'},
+    ],
+    warn:'Стоката за връщане и ревизиите НЕ се качват едновременно за осчетоводяване! Рекламации осветление — до 10-то число.',
+  },
+  {
+    code:'РАЗЛИКИ-ДОС', name:'Разлики при прием от доставчик', cat:'Операции', color:'var(--red)',
+    desc:'При разлика между документа и физически доставеното — подай в ДЕНЯ на доставката. Срок за прием: максимум 3 дни.',
+    physical:[
+      'Снимай: увредена стока, липси, грешен баркод/етикет',
+      'Попълни бланката за разлики: SAP код, по ВД, по стокова на доставчика, реално доставено',
+      'При доставка от куриер — преглеждай пред куриера, при щета пиши протокол',
+    ],
+    sap:[
+      {t:'Изпрати мейл в деня на доставката', d:'НОВ имейл за всяка поръчка отделно → Тема: [Номер поръчка] - РАЗЛИКИ → До: c.teneva@temax.bg + снабдител + счетоводител. Прикачи: стокова разписка + бланка разлики + снимки'},
+      {t:'След обработка от ЦО', d:'Излишък → върни с ИД. Липса → изпиши с ИД. Грешен прием → незабавен мейл до c.teneva + m.pavlova @temax.bg. Върната стока по-късно → уведоми Цветелина веднага'},
+      {t:'Актуализирай справката', d:'Линк от бюлетина → „Стока за изтегляне по разлики" → актуализирай взето/невзето'},
+      {t:'Провери статус в VL06I', d:'Всички документи трябва да са статус С. Стока в обекта >14 дни → пиши на Цветелина'},
+    ],
+    warn:'НЕ приемай, лепи етикети или пускай в зала стока без одобрение от ЦО. Не приемай доставка без стокова разписка.',
+  },
+  {
+    code:'РАЗЛИКИ-ТРАНСФ', name:'Разлики при трансфер между обекти', cat:'Операции', color:'var(--amber)',
+    desc:'При разлика при получен трансфер — подай бланка до обекта изпращач до 3 дни. Всички заявки за корекция с тип 4.',
+    physical:[
+      'Снимай: разлика от фабрична опаковка, увредена стока, грешен баркод',
+      'Попълни бланката: СР номер, ВД номер, SAP код, по ВД, реално доставено, коментар',
+    ],
+    sap:[
+      {t:'Изпрати бланка до изпращача', d:'Мейл до обекта изпращач с бланка разлики до 3 дни след доставката'},
+      {t:'Излишък без документ', d:'Провери за А/В в <span class="key">VL06I</span> и неизписана заявка в ZSTR → ако няма: <span class="key">ZSTR</span> → заявка тип <span class="key">4</span> (корекция трансфер!) → ако изпращачът няма наличност: minus@temax.bg'},
+      {t:'Разлика фабрична опаковка', d:'Приеми по документ → мейл до m.pavlova@temax.bg + снимки на кашон и съдържание'},
+      {t:'Грешен баркод', d:'Мейл до j.jeliazkov@temax.bg и m.pavlova@temax.bg + снимки'},
+      {t:'Сходни артикули', d:'Приеми по документ → мейл до m.pavlova@temax.bg за ZPACK'},
+      {t:'Провери стока на път', d:'<span class="key">VL06I</span> → всички трансферни документи трябва да са статус С. А и В → влизат в месечна справка за стока на път'},
+    ],
+    warn:'ВСИЧКИ заявки по разлики при трансфери — тип 4 (корекция трансфер)! Не тип 1.',
+  },
+  {
+    code:'КЛ-ПОРЪЧКИ', name:'Клиентски поръчки', cat:'Операции', color:'var(--blue)',
+    desc:'Два варианта: неналичен артикул (заприхождаваш с 951, изписваш с 952 при доставка) или наличен с капаро (изписваш с 952, заприхождаваш с 951 при издължаване).',
+    physical:[
+      'Попълни бланката за клиентска поръчка по образец',
+      'Маркирай на каса: неналичен → арт.94549 | с капаро → арт.900001',
+      'Дай оригинала на клиента, запази дубликата с попълнения формуляр',
+      'Уведоми клиента при получаване на стоката',
+    ],
+    sap:[
+      {t:'Неналичен артикул — заприхождаване', d:'<span class="key">MIGO</span> → A01 → R10 → движение <span class="key">951</span> → въведи артикул и количество → в текст: номер и дата на поръчката → Осчетоводи'},
+      {t:'Генерирай заявка', d:'<span class="key">ZSTOCK</span> за заявка към доставчик | <span class="key">ZSTR</span> тип <span class="key">1</span> за трансфер от магазин'},
+      {t:'При доставка — изписване', d:'<span class="key">MIGO</span> → A07 → R10 → движение <span class="key">952</span> → същия артикул и количество → в текст: номер и дата на поръчката → Осчетоводи'},
+      {t:'Наличен с капаро — изписване', d:'<span class="key">MIGO</span> → A07 → R10 → движение <span class="key">952</span> → изпиши наличното количество (спира се да се вижда от другите магазини)'},
+      {t:'При издължаване — заприхождаване', d:'<span class="key">MIGO</span> → A01 → R10 → движение <span class="key">951</span> → закрий движението в ДЕНЯ на издължаване'},
+      {t:'Провери в MB51', d:'<span class="key">MB51</span> → движения 951+952 → за всеки артикул количествата трябва да са равни, сума = 0'},
+    ],
+    warn:'Артикули с 951 НЕ се ревизират! При незакрити 951 от предни месеци — спешна проверка. 951 от 22:53 → смени датата!',
+  },
+];
+
+function renderProcess(filter) {
+  var fl = (filter || '').toLowerCase();
+  var filtered = PROC_DATA.filter(function(p) {
+    return !fl || p.name.toLowerCase().includes(fl) ||
+      p.code.toLowerCase().includes(fl) ||
+      p.cat.toLowerCase().includes(fl) ||
+      (p.desc && p.desc.toLowerCase().includes(fl));
+  });
+
+  // Group by cat
+  var cats = {};
+  filtered.forEach(function(p) {
+    if (!cats[p.cat]) cats[p.cat] = [];
+    cats[p.cat].push(p);
+  });
+
+  var html = '';
+  Object.keys(cats).forEach(function(cat) {
+    html += '<div class="slbl">' + cat + '</div>';
+    cats[cat].forEach(function(p) {
+      var id = 'pc-' + p.code.replace(/[^a-z0-9]/gi, '');
+      html += '<div class="sap-card" id="' + id + '">';
+      html += '<div class="sap-hd" onclick="toggleSap(\'' + id + '\')">';
+      html += '<div class="sap-tx"><span style="width:10px;height:10px;border-radius:50%;background:' + p.color + ';flex-shrink:0;display:inline-block;margin-right:8px"></span>';
+      html += '<span class="sap-name" style="font-weight:500">' + p.name + '</span></div>';
+      html += '<span class="sap-arr">▶</span></div>';
+      html += '<div class="sap-body">';
+      html += '<div class="sap-desc">' + p.desc + '</div>';
+
+      // Physical steps
+      if (p.physical && p.physical.length) {
+        html += '<div class="slbl" style="margin-top:10px">🏪 Физически стъпки</div>';
+        html += '<div class="step-list">';
+        p.physical.forEach(function(s, i) {
+          html += '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div class="step-txt">' + s + '</div></div>';
+        });
+        html += '</div>';
+      }
+
+      // SAP steps
+      if (p.sap && p.sap.length) {
+        html += '<div class="slbl" style="margin-top:10px">💻 Стъпки в SAP</div>';
+        html += '<div class="step-list">';
+        p.sap.forEach(function(s, i) {
+          html += '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div class="step-txt"><strong>' + s.t + '</strong>' + (s.d ? '<br>' + s.d : '') + '</div></div>';
+        });
+        html += '</div>';
+      }
+
+      if (p.warn) html += '<div class="warn-box" style="margin-top:8px">⚠ ' + p.warn + '</div>';
+      if (p.tip) html += '<div class="tip-box" style="margin-top:6px">💡 ' + p.tip + '</div>';
+      html += '</div></div>';
+    });
+  });
+
+  if (!html) html = '<div style="text-align:center;padding:30px;color:var(--muted);font-size:13px">Няма резултати</div>';
+  var el = document.getElementById('proc-list');
+  if (el) el.innerHTML = html;
+}
+
+function filterProcess(v) { renderProcess(v); }
+
 const JOKERS = {
   j1: {
     title:'📋 Разлики при прием от доставчик',
