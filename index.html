@@ -891,7 +891,6 @@ function diagNotif() {
   // Step 3: try to show notification
   try {
     showNotif('ТеМАХ РМ — Тест', 'Нотификациите работят! ' + new Date().toLocaleTimeString('bg-BG'));
-    n.onerror = function(e) { alert('Грешка при показване: ' + JSON.stringify(e)); };
     toast('✓ Нотификацията е изпратена');
   } catch(e) {
     alert('Грешка: ' + e.message);
