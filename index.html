@@ -837,6 +837,21 @@ function checkNotif() {
     el.textContent='Не са активирани — натисни бутона по-долу';
   }
 }
+function showNotif(title, body) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.ready.then(function(reg) {
+      reg.showNotification(title, {body: body, icon: 'icon-192.png'});
+    });
+  } else {
+    try { new Notification(title, {body: body}); } catch(e) {
+      navigator.serviceWorker.ready.then(function(reg) {
+        reg.showNotification(title, {body: body, icon: 'icon-192.png'});
+      });
+    }
+  }
+}
+
 function reqNotif() {
   if (!('Notification' in window)) return toast('Браузърът не поддържа нотификации');
   Notification.requestPermission().then(function(p) {
@@ -845,7 +860,7 @@ function reqNotif() {
       toast('✓ Нотификациите са активирани');
       checkNotif();
       scheduleReminders();
-      setTimeout(function() { new Notification('ТеМАХ РМ ✓',{body:'Готово! Ще получаваш напомняния за задачите.'}); }, 400);
+      setTimeout(function() { showNotif('ТеМАХ РМ ✓','Готово! Ще получаваш напомняния за задачите.'); }, 400);
     } else {
       toast('Нотификациите бяха отказани');
     }
@@ -875,10 +890,7 @@ function diagNotif() {
   }
   // Step 3: try to show notification
   try {
-    var n = new Notification('ТеМАХ РМ — Тест', {
-      body: 'Нотификациите работят! ' + new Date().toLocaleTimeString('bg-BG'),
-      requireInteraction: false
-    });
+    showNotif('ТеМАХ РМ — Тест', 'Нотификациите работят! ' + new Date().toLocaleTimeString('bg-BG'));
     n.onerror = function(e) { alert('Грешка при показване: ' + JSON.stringify(e)); };
     toast('✓ Нотификацията е изпратена');
   } catch(e) {
@@ -894,7 +906,7 @@ function testNotif() {
   const msg = undone.length
     ? `${undone.length} незавършени задачи за ${DAY[dow]}`
     : '🎉 Всички задачи за днес са изпълнени!';
-  new Notification('ТеМАХ РМ — ' + DAY[dow], {body: msg});
+  showNotif('ТеМАХ РМ — ' + DAY[dow], msg);
 }
 function scheduleReminders() {
   if (Notification.permission!=='granted') return;
@@ -907,10 +919,7 @@ function scheduleReminders() {
     const labels={8:'Сутрешни задачи',14:'Следобедни задачи',17:'Краен преглед'};
     const ids={8:'r1',14:'r2',17:'r3'};
     var _cb=document.getElementById(ids[h]); if (labels[h] && _cb && _cb.checked) {
-      new Notification('ТеМАХ РМ — '+labels[h], {
-        body: undone.length+' незавършени задачи за '+DAY[dow],
-        tag:'temax-'+h
-      });
+      showNotif('ТеМАХ РМ — '+labels[h], undone.length+' незавършени задачи за '+DAY[dow]);
     }
   }, 60000);
 }
