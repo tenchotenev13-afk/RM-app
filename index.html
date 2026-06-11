@@ -144,7 +144,8 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
 </style>
-</head>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
 <body>
 <div class="hdr">
   <div class="hdr-logo">
@@ -657,6 +658,7 @@ window.addEventListener('load', () => {
   renderProcess();
   renderTeam();
   renderEditList();
+  setTimeout(initOneSignal, 1500);
   highlightToday();
   checkNotif();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
@@ -976,6 +978,48 @@ function sendReminderIfNeeded(h, dow) {
   var undone = allTasks.filter(function(t) { return !done[t.id]; });
   if (!undone.length) return;
   showNotif('ТеМАХ РМ — ' + labels[h], undone.length + ' незавършени задачи за ' + DAY[dow]);
+}
+
+// ── ONESIGNAL INTEGRATION ──────────────────────────────────────────
+var OS_APP_ID = 'a326639e-4ace-46f5-baa7-3f6259431d18';
+var osInitialized = false;
+
+function initOneSignal() {
+  if (osInitialized || typeof OneSignal === 'undefined') return;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(function(OneSignal) {
+    OneSignal.init({
+      appId: OS_APP_ID,
+      serviceWorkerPath: 'OneSignalSDKWorker.js',
+      notifyButton: { enable: false },
+      allowLocalhostAsSecureOrigin: true
+    }).then(function() {
+      osInitialized = true;
+      OneSignal.User.addTag('rm_user', 'true');
+      console.log('OneSignal initialized');
+    }).catch(function(e) { console.log('OneSignal init error:', e); });
+  });
+}
+
+function registerOneSignal() {
+  if (typeof OneSignal === 'undefined') {
+    console.log('OneSignal SDK not loaded yet');
+    return;
+  }
+  try {
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(function(OneSignal) {
+      OneSignal.Notifications.requestPermission().then(function(granted) {
+        if (granted) {
+          OneSignal.User.addTag('rm_user', 'true');
+          toast('✓ Push нотификациите са регистрирани');
+          console.log('OneSignal subscribed');
+        }
+      }).catch(function(e) { console.log('OneSignal subscribe error:', e); });
+    });
+  } catch(e) {
+    console.log('registerOneSignal error:', e);
+  }
 }
 
 // ── SUPABASE BULLETIN INTEGRATION ─────────────────────────────────
