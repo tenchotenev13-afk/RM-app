@@ -1589,6 +1589,11 @@ function renderWeekPortalTasks() {
   weekEnd.setDate(weekStart.getDate() + 4); // Friday
   weekEnd.setHours(23,59,59,999);
 
+  var weekStartISO = weekStart.toISOString().slice(0,10);
+  var weekEndDate = new Date(weekStart);
+  weekEndDate.setDate(weekStart.getDate() + 4);
+  var weekEndISO = weekEndDate.toISOString().slice(0,10);
+
   var DAY_NAMES = ['Нед','Пон','Вт','Ср','Чет','Пет','Съб'];
   var COLORS = {trade:'var(--green)',warehouse:'var(--blue)',admin:'var(--muted)'};
   var ICONS = {trade:'🛒',warehouse:'📦',admin:'⚙️'};
@@ -1602,8 +1607,9 @@ function renderWeekPortalTasks() {
       noDayTasks.push(t);
       return;
     }
-    var d = new Date(t.due_date);
-    if (d >= weekStart && d <= weekEnd) {
+    var taskDate = t.due_date.slice(0,10);
+    if (taskDate >= weekStartISO && taskDate <= weekEndISO) {
+      var d = new Date(t.due_date + 'T12:00:00');
       var taskDow = d.getDay();
       if (taskDow >= 1 && taskDow <= 5) {
         byDay[taskDow].push(t);
