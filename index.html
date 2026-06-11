@@ -695,9 +695,10 @@ function renderToday() {
   const bTasks = bulletin.filter(b => b.day === dayName || b.day === 'Всеки ден').map((b,i) => ({
     id: b.id || ('b'+i),
     t: b.text,
-    m: b.fromPortal ? '📡 от портала — Т-Бюлетин' : 'от бюлетина',
-    c: b.fromPortal ? 'b' : 'a',
+    m: b.m || (b.fromPortal ? '📡 от портала — Т-Бюлетин' : 'от бюлетина'),
+    c: b.fromPortal ? (b.role === 'rm' ? 'b' : 'g') : 'a',
     bl: b.fromPortal ? 'Бюлетин (портал)' : 'Бюлетин',
+    role: b.role || (b.fromPortal ? 'mag' : null),
     bulletin: true
   }));
   const tasks = [...base, ...bTasks];
@@ -1053,6 +1054,73 @@ function sbFetch(table, query) {
   });
 }
 
+function escHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// RM tasks that require control from Regional Manager
+// Based on the RM job description and process documents
+var RM_CONTROL_DEPTS = {
+  warehouse: true,  // Склад/Приемане - РМ контролира изцяло
+  admin: true       // Администрация - РМ контролира
+};
+// Trade dept tasks - магазинът ги изпълнява, РМ само следи
+// Some warehouse tasks are RM responsibility
+
+function injectPortalTasksToday(tasks, bulletinWeek) {
+  var now = new Date();
+  var currentWeek = getWeekNum(now);
+  // Allow if same week or no week specified
+  if (bulletinWeek && Math.abs(bulletinWeek - currentWeek) > 1) return;
+
+  var dow = now.getDay();
+  if (dow === 0 || dow === 6) return; // Skip weekends
+
+  var dayISO = now.toISOString().slice(0, 10);
+  var DAY_BG_SHORT = ['Нед','Пон','Вт','Ср','Чет','Пет','Съб'];
+
+  // Filter tasks for today
+  var todayTasks = tasks.filter(function(t) {
+    if (!t.due_date) return true; // No date = show every workday
+    return t.due_date === dayISO;
+  });
+
+  if (!todayTasks.length) return;
+
+  // Remove old portal tasks from bulletin array
+  bulletin = bulletin.filter(function(b) { return !b.fromPortal; });
+
+  // Add today's portal tasks
+  todayTasks.forEach(function(t) {
+    var isRmControl = t.department === 'warehouse' || t.department === 'admin';
+    var dept = DEPT_LABELS[t.department] || {label: t.department, color: 'var(--muted)', icon:'📋'};
+
+    // Format due date display
+    var dateStr = '';
+    if (t.due_date) {
+      var d = new Date(t.due_date);
+      dateStr = DAY_BG_SHORT[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1<10?'0':'') + (d.getMonth()+1);
+    }
+
+    var metaStr = dept.icon + ' ' + dept.label;
+    if (dateStr) metaStr += ' · 📅 ' + dateStr;
+    if (t.description) metaStr += ' · ' + t.description;
+
+    bulletin.push({
+      id: 'portal-' + t.id,
+      day: DAY[dow] || 'Понеделник',
+      text: t.title || '',
+      m: metaStr,
+      fromPortal: true,
+      role: isRmControl ? 'rm' : 'mag',  // РМ контролира warehouse/admin, магазинът - trade
+      dept: t.department
+    });
+  });
+
+  // Re-render today to show new tasks
+  renderToday();
+}
+
 function showCorsHelp() {
   alert('За да поправиш CORS грешката:\n\n1. supabase.com/dashboard → проект xiwkdiqqplgdcrkewgtv\n2. Settings → API → "Allowed Origins" / "CORS"\n3. Добави: https://tenchotenev13-afk.github.io\n4. Save\n\nАко не намираш опцията: Authentication → URL Configuration → Site URL');
 }
@@ -1079,34 +1147,34 @@ function getWeekNum(d) {
 }
 
 function loadPortalBulletin() {
+  // Update UI elements only if bulletin panel is visible
   var statusEl = document.getElementById('bul-status');
   var portalEl = document.getElementById('bul-portal-tasks');
   var taskListEl = document.getElementById('bul-tasks-list');
   var titleEl = document.getElementById('bul-week-title');
   var subEl = document.getElementById('bul-week-sub');
 
-  if (!statusEl) return;
-  statusEl.style.display = 'block';
-  statusEl.textContent = '⏳ Зарежда се от портала...';
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.textContent = '⏳ Зарежда се от портала...';
+    statusEl.style.color = 'var(--muted)';
+  }
   if (portalEl) portalEl.style.display = 'none';
 
   var now = new Date();
   var wk = getWeekNum(now);
   var yr = now.getFullYear();
 
-  // Get latest published bulletin
   sbFetch('bulletins', 'status=eq.published&order=published_at.desc&limit=1')
     .then(function(data) {
       if (!data || !data.length) {
-        // Try draft too
         return sbFetch('bulletins', 'order=created_at.desc&limit=1');
       }
       return data;
     })
     .then(function(data) {
       if (!data || !data.length) {
-        statusEl.textContent = '⚠ Няма публикуван бюлетин в портала.';
-        statusEl.style.color = 'var(--amber)';
+        if (statusEl) { statusEl.textContent = '⚠ Няма публикуван бюлетин.'; statusEl.style.color = 'var(--amber)'; }
         return;
       }
       var bul = data[0];
@@ -1117,18 +1185,19 @@ function loadPortalBulletin() {
       if (titleEl) titleEl.textContent = 'Т-Бюлетин — Седмица ' + bulWk;
       if (subEl) subEl.textContent = 'С' + bulWk + ' · ' + bulYr + (bul.status === 'draft' ? ' · Чернова' : ' · Публикуван');
 
-      // Load tasks for this bulletin
       return sbFetch('bulletin_tasks', 'bulletin_id=eq.' + bul.id + '&order=due_date.asc')
         .then(function(tasks) {
           portalTasks = Array.isArray(tasks) ? tasks : [];
 
+          // ALWAYS inject into Today - regardless of which panel is open
+          injectPortalTasksToday(portalTasks, bulWk);
+
           if (!portalTasks.length) {
-            statusEl.textContent = '📭 Няма задачи в бюлетина за тази седмица.';
-            statusEl.style.color = 'var(--muted)';
+            if (statusEl) { statusEl.textContent = '📭 Няма задачи в бюлетина.'; statusEl.style.color = 'var(--muted)'; }
             return;
           }
 
-          // Group by department
+          // Group by department for bulletin panel display
           var byDept = {};
           portalTasks.forEach(function(t) {
             var d = t.department || 'admin';
@@ -1147,94 +1216,40 @@ function loadPortalBulletin() {
                 var dayNames = ['Нед','Пон','Вт','Ср','Чет','Пет','Съб'];
                 dueStr = dayNames[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1<10?'0':'') + (d.getMonth()+1);
               }
-              var isFromPortal = true;
               html += '<div class="task bulletin" style="--tc:' + dept.color + '">' +
                 '<div class="t-chk" style="border-color:' + dept.color + ';font-size:9px;color:' + dept.color + '">П</div>' +
                 '<div class="t-body">' +
-                  '<div class="t-title">' + escHtml(t.title || '') + '</div>' +
-                  (t.description ? '<div class="t-meta">' + escHtml(t.description) + '</div>' : '') +
-                  (dueStr ? '<span class="bdg bdg-b">📅 ' + dueStr + '</span>' : '') +
-                  '<span class="bdg bdg-a" style="margin-left:3px">Портал</span>' +
+                '<div class="t-title">' + escHtml(t.title || '') + '</div>' +
+                (t.description ? '<div class="t-meta">' + escHtml(t.description) + '</div>' : '') +
+                (dueStr ? '<span class="bdg bdg-b">📅 ' + dueStr + '</span>' : '') +
+                '<span class="bdg bdg-a" style="margin-left:3px">Портал</span>' +
                 '</div></div>';
             });
           });
 
           if (taskListEl) taskListEl.innerHTML = html;
-
-          statusEl.style.display = 'none';
+          if (statusEl) statusEl.style.display = 'none';
           if (portalEl) portalEl.style.display = 'block';
-
-          // Also inject portal tasks into TODAY view
-          injectPortalTasksToday(portalTasks, bulWk);
         });
     })
     .catch(function(err) {
       console.error('Portal bulletin error:', err);
       var msg = err.message || String(err);
-      if (msg.includes('abort') || msg.includes('timeout')) {
-        statusEl.innerHTML = '⏱ Таймаут — порталът не отговори. <button onclick="loadPortalBulletin()" style="border:none;background:none;color:var(--accent);cursor:pointer;font-size:12px;text-decoration:underline">Опитай пак</button>';
-      } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')) {
-        statusEl.innerHTML = '🔒 CORS грешка — добави домейна в Supabase. <a href="#" onclick="showCorsHelp()" style="color:var(--accent);font-size:12px;">Как?</a>';
-        statusEl.style.color = 'var(--amber)';
-      } else {
-        statusEl.textContent = '⚠ ' + msg.slice(0, 80);
-        statusEl.style.color = 'var(--red)';
+      if (statusEl) {
+        if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+          statusEl.innerHTML = '🔒 CORS грешка. <a href="#" onclick="showCorsHelp()" style="color:var(--accent)">Как да оправя?</a>';
+          statusEl.style.color = 'var(--amber)';
+        } else {
+          statusEl.textContent = '⚠ ' + msg.slice(0, 80);
+          statusEl.style.color = 'var(--red)';
+        }
+        statusEl.style.display = 'block';
       }
-      statusEl.style.display = 'block';
     });
 }
 
-function escHtml(str) {
-  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+// Duplicate load listener removed - handled in main load listener above
 
-function injectPortalTasksToday(tasks, bulletinWeek) {
-  // Only inject if we're in the right week
-  var now = new Date();
-  var currentWeek = getWeekNum(now);
-  if (bulletinWeek && bulletinWeek !== currentWeek) return;
-
-  var dow = now.getDay();
-  var dayISO = now.toISOString().slice(0,10);
-
-  // Map day of week to ISO date for matching
-  var DAY_MAP = {1:'mon',2:'tue',3:'wed',4:'thu',5:'fri'};
-
-  // Filter tasks due today OR that have no due_date (show every day)
-  var todayTasks = tasks.filter(function(t) {
-    if (!t.due_date) return dow >= 1 && dow <= 5; // show Mon-Fri if no due date
-    return t.due_date === dayISO;
-  });
-
-  if (!todayTasks.length) return;
-
-  // Store as bulletin tasks for today's view
-  var portalBulletinItems = todayTasks.map(function(t, i) {
-    var dept = DEPT_LABELS[t.department] || {label:'Портал',color:'var(--amber)'};
-    return {
-      id: 'portal-' + t.id,
-      t: t.title || '',
-      m: (t.description || '') + (t.description ? ' · ' : '') + dept.icon + ' ' + dept.label,
-      c: 'a',
-      bl: 'Бюлетин',
-      bulletin: true
-    };
-  });
-
-  // Add to bulletin array (avoid duplicates)
-  var existingIds = bulletin.map(function(b) { return b.id || b.text; });
-  portalBulletinItems.forEach(function(item) {
-    var exists = bulletin.some(function(b) { return b.id === item.id; });
-    if (!exists) bulletin.push({day: DAY[dow] || 'Понеделник', text: item.t, id: item.id, fromPortal: true});
-  });
-
-  renderToday();
-}
-
-// Load bulletin data on startup (silently)
-window.addEventListener('load', function() {
-  setTimeout(loadPortalBulletin, 1500); // slight delay so app loads first
-});
 
 // ── AUTO RESET bulletin tasks from portal on week change ────────────
 // (already handled by Sunday midnight reset above)
