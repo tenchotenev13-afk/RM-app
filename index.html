@@ -663,6 +663,7 @@ window.addEventListener('load', () => {
   renderTeam();
   renderEditList();
   setTimeout(initOneSignal, 1500);
+  checkDailyReset();
   setTimeout(loadPortalBulletin, 1000);
   highlightToday();
   checkNotif();
@@ -687,7 +688,11 @@ function nav(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
   btn.classList.add('on');
   document.getElementById('p-'+id).classList.add('on');
-  if (id === 'week') renderWeekPortalTasks();
+  if (id === 'week') {
+    renderWeekPortalTasks();
+    if (!portalTasks || !portalTasks.length) loadPortalBulletin();
+  }
+  if (id === 'edit') loadPortalBulletin();
 }
 
 // ── TODAY ──────────────────────────────────────────────────────────
@@ -1254,6 +1259,11 @@ function loadPortalBulletin() {
           // ALWAYS inject into Today - regardless of which panel is open
           injectPortalTasksToday(portalTasks, bulWk);
           renderWeekPortalTasks();
+          // If week panel is currently visible, re-render it
+          var weekPanel = document.getElementById('p-week');
+          if (weekPanel && weekPanel.classList.contains('on')) {
+            renderWeekPortalTasks();
+          }
 
           if (!portalTasks.length) {
             if (statusEl) { statusEl.textContent = '📭 Няма задачи в бюлетина.'; statusEl.style.color = 'var(--muted)'; }
@@ -1602,12 +1612,15 @@ function renderWeekPortalTasks() {
   var byDay = {1:[],2:[],3:[],4:[],5:[]};
   var noDayTasks = [];
 
+  console.log('renderWeekPortalTasks: portalTasks='+portalTasks.length+' weekStart='+weekStartISO+' weekEnd='+weekEndISO);
   portalTasks.forEach(function(t) {
     if (!t.due_date) {
       noDayTasks.push(t);
+      console.log('  no-date task:', t.title);
       return;
     }
     var taskDate = t.due_date.slice(0,10);
+    console.log('  task:', t.title, 'date:', taskDate, 'in range:', taskDate >= weekStartISO && taskDate <= weekEndISO);
     if (taskDate >= weekStartISO && taskDate <= weekEndISO) {
       var d = new Date(t.due_date + 'T12:00:00');
       var taskDow = d.getDay();
@@ -2074,15 +2087,26 @@ function filterTeam(v) { renderTeam(v); }
 
 
 
-setInterval(()=>{
-  const n=new Date();
-  if (n.getHours()===0&&n.getMinutes()===0) {
-    done={};
-    localStorage.setItem('tm-done','{}');
-    // Reset bulletin on Sunday midnight
-    if (n.getDay()===0) { bulletin=[]; localStorage.setItem('tm-bulletin','[]'); }
+// ── DAILY RESET ──────────────────────────────────────────────
+function checkDailyReset() {
+  var today = new Date().toISOString().slice(0,10);
+  var lastReset = localStorage.getItem('tm-last-reset');
+  if (lastReset !== today) {
+    done = {};
+    localStorage.setItem('tm-done', '{}');
+    localStorage.setItem('tm-last-reset', today);
+    var dow = new Date().getDay();
+    if (dow === 1) {
+      bulletin = bulletin.filter(function(b) { return b.fromPortal; });
+      localStorage.setItem('tm-bulletin', '[]');
+    }
     renderToday();
   }
+}
+
+setInterval(function() {
+  var n = new Date();
+  if (n.getHours()===0 && n.getMinutes()===0) { checkDailyReset(); }
 }, 60000);
 </script>
 </body>
