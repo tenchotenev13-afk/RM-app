@@ -740,7 +740,7 @@ function renderToday() {
         var d = new Date(t.due_date);
         dateStr = DAY_BG_SHORT[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1<10?'0':'') + (d.getMonth()+1);
       }
-      var meta = dept.icon + ' ' + dept.label + (dateStr ? ' · 📅 ' + dateStr : '') + (t.description ? ' · ' + t.description : '');
+      var meta = dept.icon + ' ' + dept.label + (dateStr ? ' · ' + dateStr : '') + (t.description ? ' · ' + t.description : '');
       portalForToday.push({
         id: 'portal-' + t.id,
         t: t.title || '',
@@ -1180,7 +1180,7 @@ function injectPortalTasksToday(tasks, bulletinWeek) {
     }
 
     var metaStr = dept.icon + ' ' + dept.label;
-    if (dateStr) metaStr += ' · 📅 ' + dateStr;
+    if (dateStr) metaStr += ' · ' + dateStr;
     if (t.description) metaStr += ' · ' + t.description;
 
     bulletin.push({
@@ -1760,7 +1760,7 @@ function renderWeekPortalTasks() {
         var isRm = t.department === 'warehouse' || t.department === 'admin';
         html += '<div style="padding:4px 6px;border-radius:6px;margin-bottom:3px;background:' + (isDone?'rgba(78,201,148,.08)':'var(--bg3)') + ';border-left:2px solid ' + color + ';cursor:pointer;' + (isDone?'opacity:.5':'') + '" onclick="toggleTask(\'portal-' + t.id + '\')">';
         html += '<div style="font-size:11px;font-weight:500;' + (isDone?'text-decoration:line-through':'') + '">' + (t.title||'') + '</div>';
-        html += '<div style="font-size:10px;color:var(--muted);margin-top:1px">' + icon + ' ' + (isRm?'<span style="color:var(--blue)">РМ</span>':'<span style="color:var(--green)">Магазин</span>') + '</div>';
+        html += '<div style="font-size:10px;color:var(--muted);margin-top:1px">' + (isRm?'<span style="color:var(--blue)">РМ</span>':'<span style="color:var(--green)">Магазин</span>') + '</div>';
         html += '</div>';
       });
     }
@@ -1954,7 +1954,6 @@ const JOKERS = {
     ],
     warn:'Не приемай стока без документ. Не въвеждай в зала без одобрение от ЦО. При увредена стока или липси — снимките са задължителни!',
   },
-,
 
   'inspekcia': {
     storageKey:'joker-inspekcia',
