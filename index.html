@@ -2170,7 +2170,7 @@ function showJoker(id) {
       const isDone = !!stored[key];
       html += `<div class="task${isDone?' done':''}" style="--tc:${j.color}" onclick="toggleJokerStep('${id}','${key}')">
         <div class="t-chk">${isDone?'✓':''}</div>
-        <div class="t-body"><div class="t-title">${typeof step === 'object' ? step.text : step}</div></div>
+        <div class="t-body"><div class="t-title">${step && step.text ? step.text : step}</div></div>
       </div>`;
       stepIdx++;
     });
