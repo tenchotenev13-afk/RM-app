@@ -60,6 +60,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .task.done .t-chk{background:var(--green);border-color:var(--green);color:#0f1923}
 .t-body{flex:1;min-width:0}
 .t-freq{flex-shrink:0;font-size:10px;color:var(--muted);font-family:var(--mono);margin-top:2px}
+.t-links{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.t-link{padding:2px 7px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--accent);font-family:var(--mono);font-size:10px;cursor:pointer}
 .t-title{font-size:13px;line-height:1.45}
 .t-meta{font-size:11px;color:var(--muted);margin-top:2px;font-family:var(--mono);line-height:1.4}
 .bdg{display:inline-block;padding:2px 6px;border-radius:8px;font-size:10px;font-weight:500;margin-top:3px;font-family:var(--mono)}
@@ -488,24 +490,24 @@ const REG_885 = [
   {id:'k-d3',code:'D3',t:'Етикети за сменени цени / нови промоции разпечатани и поставени',owner:'Кристина',src:'ДХ Главен касиер т.19, т.21',sap:'',freq:'daily'},
   {id:'k-d5',code:'D5',t:'График транспорт попълнен в портала',owner:'Кристина',src:'Портал → транспорт [? модул]; ДХ Гл. касиер т.16',sap:'',freq:'daily'},
   {id:'k-d6',code:'D6',t:'Рекламации приети и проследени',owner:'Кристина',src:'Портал → Рекламации; Рекламации_и_сервизи.docx',sap:'ZINVCOUNT',freq:'daily'},
-  {id:'k-d7',code:'D7',t:'Клиентски заявки при липса на наличност; заявки към доставчици',owner:'Мария',src:'Портал → Клиентски заявки; КЛИЕНТСКИ_ПОРЪЧКИ.docx',sap:'MB51 (951/952)',freq:'daily'},
-  {id:'k-d8',code:'D8',t:'Приета стока подредена в склад/зала до 1 ден; няма неприета стока >1 ден',owner:'Реджеп → РМ',src:'Чек лист Мениджър Q40',sap:'VL06I',freq:'daily'},
+  {id:'k-d7',code:'D7',t:'Клиентски заявки при липса на наличност; заявки към доставчици',owner:'Мария',src:'Портал → Клиентски заявки; КЛИЕНТСКИ_ПОРЪЧКИ.docx',sap:'MB51 (951/952)',freq:'daily',proc:'КЛ-ПОРЪЧКИ'},
+  {id:'k-d8',code:'D8',t:'Приета стока подредена в склад/зала до 1 ден; няма неприета стока >1 ден',owner:'Реджеп → РМ',src:'Чек лист Мениджър Q40',sap:'VL06I',freq:'daily',proc:'ПРИЕМ'},
   {id:'k-d9',code:'D9',t:'Зала: чистота, музика, осветление, цени, етикети, проходи, униформи, поздрав',owner:'Любомир / Кръстина',src:'Чек лист Мениджър Q1–Q29',sap:'',freq:'daily'},
   {id:'k-d10',code:'D10',t:'Склад: подредба, безопасност, покрити сухи смеси, зона пушене',owner:'Реджеп',src:'Чек лист Мениджър Q34–Q39',sap:'',freq:'daily'},
-  {id:'k-w1',code:'W1',t:'Ревизии качени до 16:00',owner:'Реджеп → РМ проверява',src:'BASE w3; ИНВЕНТАРИЗАЦИИ.docx',sap:'ZINVCHECK',freq:'weekly',dow:[1,2,3],deadline:'до сряда 16:00',metric:'revizia_953',rt:'74da41e4-494f-48cc-a434-79bfc04fc243'},
-  {id:'k-w2',code:'W2',t:'Стока за връщане — подадена в портала',owner:'Реджеп',src:'Портал → За връщане; СТОКА_ЗА_ВРЪЩАНЕ.docx',sap:'ZINVCOUNT',freq:'weekly',dow:3,metric:'stoka_vrashtane',rt:'0a20f6e8-c526-400b-bed5-57194f35e4e5'},
-  {id:'k-w3',code:'W3',t:'Разлики по прием — подадени в портала',owner:'Реджеп',src:'Портал → Разлики; РАЗЛИКИ_ПО_ПРИЕМ_*.docx',sap:'',freq:'weekly',dow:3,rt:'e9d418af-311a-45ec-b4da-0f9ad69205e7'},
+  {id:'k-w1',code:'W1',t:'Ревизии качени до 16:00',owner:'Реджеп → РМ проверява',src:'BASE w3; ИНВЕНТАРИЗАЦИИ.docx',sap:'ZINVCHECK',freq:'weekly',dow:[1,2,3],deadline:'до сряда 16:00',metric:'revizia_953',proc:'РЕВИЗИИ',rt:'74da41e4-494f-48cc-a434-79bfc04fc243'},
+  {id:'k-w2',code:'W2',t:'Стока за връщане — подадена в портала',owner:'Реджеп',src:'Портал → За връщане; СТОКА_ЗА_ВРЪЩАНЕ.docx',sap:'ZINVCOUNT',freq:'weekly',dow:3,metric:'stoka_vrashtane',proc:'ВРЪЩАНЕ',rt:'0a20f6e8-c526-400b-bed5-57194f35e4e5'},
+  {id:'k-w3',code:'W3',t:'Разлики по прием — подадени в портала',owner:'Реджеп',src:'Портал → Разлики; РАЗЛИКИ_ПО_ПРИЕМ_*.docx',sap:'',freq:'weekly',dow:3,proc:'РАЗЛИКИ-ДОС',rt:'e9d418af-311a-45ec-b4da-0f9ad69205e7'},
   {id:'k-w4',code:'W4',t:'Срокове на годност — качени',owner:'Любомир / Кръстина',src:'BASE w5',sap:'',freq:'weekly',dow:3,rt:'31351174-4182-46a1-a1ce-91e877066297'},
   {id:'k-w5',code:'W5',t:'Анализ на камери',owner:'РМ',src:'регионални чек лист; Чек лист наблюдение на Камери.xlsx',sap:'',freq:'weekly',dow:5},
   {id:'k-w6',code:'W6',t:'Седмично обобщение минуси + обратни движения',owner:'РМ',src:'BASE f3',sap:'MB51',freq:'weekly',dow:5},
   {id:'k-w10',code:'W10',t:'Проверка на застояла стока за връщане >14 дни',owner:'Реджеп → РМ',src:'Чек лист Мениджър Q41',sap:'ZINVCOUNT',freq:'weekly',dow:1,label:'тази седмица'},
-  {id:'k-m1',code:'M1',t:'Предварителен график за следващ месец → trz@temax.bg',owner:'РМ (вместо управител)',src:'ПРАВИЛА; инструкция_Попълване_на_график.docx',sap:'',freq:'monthly',due:25},
-  {id:'k-m2',code:'M2',t:'Утвърден и подписан график на видно място в обекта',owner:'РМ',src:'ПРАВИЛА',sap:'',freq:'monthly',due:'last'},
-  {id:'k-m3',code:'M3',t:'Присъствени форми → ЧР',owner:'РМ',src:'ПРАВИЛА',sap:'',freq:'monthly',due:3},
+  {id:'k-m1',code:'M1',t:'Предварителен график за следващ месец → trz@temax.bg',owner:'РМ (вместо управител)',src:'ПРАВИЛА; инструкция_Попълване_на_график.docx',sap:'',freq:'monthly',due:25,proc:'ГРАФИК'},
+  {id:'k-m2',code:'M2',t:'Утвърден и подписан график на видно място в обекта',owner:'РМ',src:'ПРАВИЛА',sap:'',freq:'monthly',due:'last',proc:'ГРАФИК'},
+  {id:'k-m3',code:'M3',t:'Присъствени форми → ЧР',owner:'РМ',src:'ПРАВИЛА',sap:'',freq:'monthly',due:3,proc:'ГРАФИЦИ'},
   {id:'k-m4',code:'M4',t:'Месечен отчет за обекта: ревизии, разходи, персонал, оборот',owner:'РМ',src:'ДХ Управител т.6',sap:'',freq:'monthly'},
-  {id:'k-m5',code:'M5',t:'Потвърждение брак и преоценка (стойност преоценка)',owner:'РМ',src:'регионални чек лист; Тeмплейт-преоценкА.xlsx',sap:'MB51 / MIGO',freq:'monthly',metric:'preocenka'},
+  {id:'k-m5',code:'M5',t:'Потвърждение брак и преоценка (стойност преоценка)',owner:'РМ',src:'регионални чек лист; Тeмплейт-преоценкА.xlsx',sap:'MB51 / MIGO',freq:'monthly',metric:'preocenka',proc:'ДВИЖЕНИЯ'},
   {id:'k-m7',code:'M7',t:'Проверка досиета — необходими документи, тренинг програми',owner:'РМ',src:'необходими документи.ods',sap:'',freq:'monthly'},
-  {id:'k-m8',code:'M8',t:'Изписване консумативи, брак, вътрешни нужди; брак плочки',owner:'РМ',src:'регионални чек лист; ИЗПИСВАНЕ.docx',sap:'VL06O / ZGIPOST',freq:'monthly'},
+  {id:'k-m8',code:'M8',t:'Изписване консумативи, брак, вътрешни нужди; брак плочки',owner:'РМ',src:'регионални чек лист; ИЗПИСВАНЕ.docx',sap:'VL06O / ZGIPOST',freq:'monthly',proc:'ИЗПИСВАНЕ'},
   {id:'k-m9',code:'M9',t:'„Стока на път“ — проверка и финално изчистване',owner:'РМ',src:'Портал → Стока на път; регионални чек лист',sap:'ZSTO / VL06I',freq:'monthly',metric:'stoka_na_pat'},
   {id:'k-m10',code:'M10',t:'Обобщение на 2 контролни карти, анализ >15% разлика → план',owner:'РМ',src:'регионални чек лист',sap:'',freq:'monthly'},
 ];
@@ -781,6 +783,18 @@ function nav(id, btn) {
   if (id === 'edit') loadPortalBulletin();
 }
 
+// Бърз преход от ред в „Днес“ към SAP или Процеси с поставен филтър
+function goTo(panelId, filter) {
+  const btn = [...document.querySelectorAll('.nav-btn')].find(b => (b.getAttribute('onclick') || '').includes(`nav('${panelId}'`));
+  if (!btn) return;
+  nav(panelId, btn);
+  const inp = document.getElementById(panelId === 'sap' ? 'sap-q' : 'proc-q');
+  if (inp) inp.value = filter;
+  if (panelId === 'sap') renderSap(filter); else renderProcess(filter);
+  window.scrollTo(0, 0);
+  btn.scrollIntoView({block: 'nearest', inline: 'nearest'});
+}
+
 // ── TODAY ──────────────────────────────────────────────────────────
 function renderToday() {
   const dow = new Date().getDay();
@@ -884,6 +898,8 @@ function renderToday() {
           c: '',
           bl: 'Кърджали — обектът трябва да',
           role: null,
+          sapCodes: (r.sap || '').split(/ \/ | \(|\)|,/).map(s => s.trim()).filter(s => /^[A-Z][A-Z0-9]+$/.test(s)),
+          procName: r.proc ? (PROC_DATA.find(p => p.code === r.proc) || {}).name || '' : '',
           freqLbl: {weekly: 'седмично', monthly: 'месечно'}[r.freq] || '',
           dl: r.deadline || dueLbl || r.label || '',
           dlRed: !!(r.deadline || dueLbl)
@@ -925,6 +941,7 @@ function renderToday() {
           ${t.m?`<div class="t-meta">${t.m}</div>`:''}
           ${t.sub?`<div class="t-meta">${t.sub}</div>`:''}
           <div>${t.bl&&bc?`<span class="bdg ${bc}">${t.bl}</span>`:''} ${roleBdg}${t.dl?`<span class="bdg ${t.dlRed?'bdg-r':''}"${t.dlRed?'':' style="background:var(--bg3);color:var(--muted)"'}>${t.dl}</span>`:''}${(t.tags||[]).map(x => `<span class="bdg ${x.cls||''}" style="margin-left:3px;${x.style||''}">${x.text}</span>`).join('')}</div>
+          ${(t.sapCodes||[]).length || t.procName ? `<div class="t-links">${(t.sapCodes||[]).map(s => `<button class="t-link" onclick="event.stopPropagation();goTo('sap','${s}')">${s}</button>`).join('')}${t.procName ? `<button class="t-link" onclick="event.stopPropagation();goTo('process','${escHtml(t.procName).replace(/'/g, "\\'")}')">процес</button>` : ''}</div>` : ''}
         </div>${t.freqLbl?`<div class="t-freq">${t.freqLbl}</div>`:''}</div>`;
     });
   }

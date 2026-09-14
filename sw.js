@@ -1,4 +1,4 @@
-var CACHE = 'temax-v7';
+var CACHE = 'temax-v8';
 var REMINDER_HOURS = [8, 14, 17];
 var DAY_BG = ['Неделя','Понеделник','Вторник','Сряда','Четвъртък','Петък','Събота'];
 
