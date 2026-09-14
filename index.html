@@ -492,8 +492,8 @@ const REG_885 = [
   {id:'k-d8',code:'D8',t:'Приета стока подредена в склад/зала до 1 ден; няма неприета стока >1 ден',owner:'Реджеп → РМ',src:'Чек лист Мениджър Q40',sap:'VL06I',freq:'daily'},
   {id:'k-d9',code:'D9',t:'Зала: чистота, музика, осветление, цени, етикети, проходи, униформи, поздрав',owner:'Любомир / Кръстина',src:'Чек лист Мениджър Q1–Q29',sap:'',freq:'daily'},
   {id:'k-d10',code:'D10',t:'Склад: подредба, безопасност, покрити сухи смеси, зона пушене',owner:'Реджеп',src:'Чек лист Мениджър Q34–Q39',sap:'',freq:'daily'},
-  {id:'k-w1',code:'W1',t:'Ревизии качени до 16:00',owner:'Реджеп → РМ проверява',src:'BASE w3; ИНВЕНТАРИЗАЦИИ.docx',sap:'ZINVCHECK',freq:'weekly',dow:[1,2,3],deadline:'до сряда 16:00'},
-  {id:'k-w2',code:'W2',t:'Стока за връщане — подадена в портала',owner:'Реджеп',src:'Портал → За връщане; СТОКА_ЗА_ВРЪЩАНЕ.docx',sap:'ZINVCOUNT',freq:'weekly',dow:3},
+  {id:'k-w1',code:'W1',t:'Ревизии качени до 16:00',owner:'Реджеп → РМ проверява',src:'BASE w3; ИНВЕНТАРИЗАЦИИ.docx',sap:'ZINVCHECK',freq:'weekly',dow:[1,2,3],deadline:'до сряда 16:00',metric:'revizia_953'},
+  {id:'k-w2',code:'W2',t:'Стока за връщане — подадена в портала',owner:'Реджеп',src:'Портал → За връщане; СТОКА_ЗА_ВРЪЩАНЕ.docx',sap:'ZINVCOUNT',freq:'weekly',dow:3,metric:'stoka_vrashtane'},
   {id:'k-w3',code:'W3',t:'Разлики по прием — подадени в портала',owner:'Реджеп',src:'Портал → Разлики; РАЗЛИКИ_ПО_ПРИЕМ_*.docx',sap:'',freq:'weekly',dow:3},
   {id:'k-w4',code:'W4',t:'Срокове на годност — качени',owner:'Любомир / Кръстина',src:'BASE w5',sap:'',freq:'weekly',dow:3},
   {id:'k-w5',code:'W5',t:'Анализ на камери',owner:'РМ',src:'регионални чек лист; Чек лист наблюдение на Камери.xlsx',sap:'',freq:'weekly',dow:5},
@@ -503,10 +503,10 @@ const REG_885 = [
   {id:'k-m2',code:'M2',t:'Утвърден и подписан график на видно място в обекта',owner:'РМ',src:'ПРАВИЛА',sap:'',freq:'monthly',due:'last'},
   {id:'k-m3',code:'M3',t:'Присъствени форми → ЧР',owner:'РМ',src:'ПРАВИЛА',sap:'',freq:'monthly',due:3},
   {id:'k-m4',code:'M4',t:'Месечен отчет за обекта: ревизии, разходи, персонал, оборот',owner:'РМ',src:'ДХ Управител т.6',sap:'',freq:'monthly'},
-  {id:'k-m5',code:'M5',t:'Потвърждение брак и преоценка (стойност преоценка)',owner:'РМ',src:'регионални чек лист; Тeмплейт-преоценкА.xlsx',sap:'MB51 / MIGO',freq:'monthly'},
+  {id:'k-m5',code:'M5',t:'Потвърждение брак и преоценка (стойност преоценка)',owner:'РМ',src:'регионални чек лист; Тeмплейт-преоценкА.xlsx',sap:'MB51 / MIGO',freq:'monthly',metric:'preocenka'},
   {id:'k-m7',code:'M7',t:'Проверка досиета — необходими документи, тренинг програми',owner:'РМ',src:'необходими документи.ods',sap:'',freq:'monthly'},
   {id:'k-m8',code:'M8',t:'Изписване консумативи, брак, вътрешни нужди; брак плочки',owner:'РМ',src:'регионални чек лист; ИЗПИСВАНЕ.docx',sap:'VL06O / ZGIPOST',freq:'monthly'},
-  {id:'k-m9',code:'M9',t:'„Стока на път“ — проверка и финално изчистване',owner:'РМ',src:'Портал → Стока на път; регионални чек лист',sap:'ZSTO / VL06I',freq:'monthly'},
+  {id:'k-m9',code:'M9',t:'„Стока на път“ — проверка и финално изчистване',owner:'РМ',src:'Портал → Стока на път; регионални чек лист',sap:'ZSTO / VL06I',freq:'monthly',metric:'stoka_na_pat'},
   {id:'k-m10',code:'M10',t:'Обобщение на 2 контролни карти, анализ >15% разлика → план',owner:'РМ',src:'регионални чек лист',sap:'',freq:'monthly'},
 ];
 
@@ -750,6 +750,7 @@ window.addEventListener('load', () => {
   setTimeout(initOneSignal, 1500);
   checkDailyReset();
   setTimeout(loadPortalBulletin, 1000);
+  setTimeout(() => { loadPortalStatus('Кърджали'); loadPortalStatus('Раднево'); }, 1000);
   highlightToday();
   checkNotif();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
@@ -799,13 +800,15 @@ function renderToday() {
   var portalForToday = [];
   if (portalTasks && portalTasks.length) {
     portalTasks.forEach(function(t) {
+      if (!storeMatch(t.target_stores)) return;
+      var st = portalStatusFields('task_id', t.id);
       var show = false;
       if (!t.due_date) {
         show = dow >= 1 && dow <= 5;
       } else if (t.due_date === dayISO) {
         show = true;
       } else if (t.due_date >= weekStartISO && t.due_date < dayISO) {
-        show = !done['portal-' + t.id];
+        show = !done['portal-' + t.id] && !st.locked;
       }
       if (!show) return;
       var isRmControl = t.department === 'warehouse' || t.department === 'admin';
@@ -816,7 +819,7 @@ function renderToday() {
         dateStr = DAY_BG_SHORT[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1<10?'0':'') + (d.getMonth()+1);
       }
       var meta = dept.icon + ' ' + dept.label + (dateStr ? ' · ' + dateStr : '') + (t.description ? ' · ' + t.description : '');
-      portalForToday.push({
+      portalForToday.push(Object.assign({
         id: 'portal-' + t.id,
         t: t.title || '',
         m: meta,
@@ -824,9 +827,29 @@ function renderToday() {
         bl: 'Бюлетин (портал)',
         role: isRmControl ? 'rm' : 'mag',
         bulletin: true
-      });
+      }, st));
     });
   }
+
+  // Постоянни задачи от портала — ден 0=пон … 6=нед
+  const portalDow = (dow + 6) % 7;
+  const todayLocal = localISO(now);
+  const recTasks = (portalRecurring || []).filter(r => {
+    const days = r.due_weekdays || (r.due_weekday != null ? [r.due_weekday] : null);
+    return days && days.includes(portalDow) && storeMatch(r.target_stores);
+  }).map(r => {
+    const isRm = r.department === 'warehouse' || r.department === 'admin';
+    const dept = DEPT_LABELS[r.department] || {label: r.department || '', icon: '📋'};
+    return Object.assign({
+      id: 'portal-rec-' + r.id,
+      t: escHtml(r.title),
+      m: dept.icon + ' ' + dept.label + (r.due_time ? ' · до ' + r.due_time : ''),
+      c: isRm ? 'b' : 'g',
+      bl: 'Постоянни задачи (портал)',
+      role: isRm ? 'rm' : 'mag',
+      bulletin: true
+    }, portalStatusFields('recurring_task_id', r.id, todayLocal));
+  });
 
   // Manual bulletin tasks (non-portal)
   const bTasks = bulletin.filter(b => !b.fromPortal && (b.day === dayName || b.day === 'Всеки ден')).map((b,i) => ({
@@ -844,7 +867,10 @@ function renderToday() {
     ? ['daily', 'weekly', 'monthly'].flatMap(f => REG_885.filter(r => r.freq === f && reg885Active(r, now))).map(r => {
         const due = r.due === 'last' ? new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() : r.due;
         const dueLbl = due ? 'срок ' + (due < 10 ? '0' : '') + due + '.' + (now.getMonth() < 9 ? '0' : '') + (now.getMonth() + 1) : '';
+        const cl = reg885Checklist(r);
         return {
+          locked: !!(cl && cl.ok),
+          tags: cl ? [{text: 'чек лист: ' + escHtml(cl.val), cls: cl.ok ? 'bdg-g' : '', style: cl.ok ? '' : PORTAL_GREY}] : [],
           id: r.id + (r.freq === 'weekly' ? '@' + isoWeekKey(now) : r.freq === 'monthly' ? '@' + monthKey(now) : ''),
           t: r.t,
           m: [r.owner, r.src, r.sap].filter(Boolean).join(' · '),
@@ -858,7 +884,7 @@ function renderToday() {
       })
     : [];
 
-  const tasks = [...base, ...portalForToday, ...bTasks, ...regTasks];
+  const tasks = [...base, ...portalForToday, ...recTasks, ...bTasks, ...regTasks];
 
   document.querySelectorAll('.store-btn').forEach(b => b.classList.toggle('on', b.dataset.store === storeFilter));
 
@@ -876,20 +902,22 @@ function renderToday() {
   const groups = {};
   tasks.forEach(t => { const g=t.bl||'Задачи'; if(!groups[g]) groups[g]=[]; groups[g].push(t); });
   let html = '';
+  const ps885 = portalStatus['Кърджали'];
   for (const [g, items] of Object.entries(groups)) {
-    html += `<div class="slbl">${g}</div>`;
+    html += `<div class="slbl">${g}${g === 'Кърджали — обектът трябва да' && ps885 ? `<span style="text-transform:none;letter-spacing:0"> · портал: ${hhmm(ps885.at)}</span>` : ''}</div>`;
     items.forEach(t => {
-      const isDone = !!done[t.id];
+      const isDone = !!t.locked || !!done[t.id];
       const bc = {r:'bdg-r',a:'bdg-a',b:'bdg-b',g:'bdg-g'}[t.c]||'';
       const bCls = t.bulletin ? ' bulletin' : '';
       const roleBdg = t.role==='rm' ? '<span class="bdg" style="background:rgba(91,155,213,.2);color:var(--blue);margin-left:3px">РМ</span>'
                     : t.role==='mag' ? '<span class="bdg" style="background:rgba(78,201,148,.2);color:var(--green);margin-left:3px">Магазин</span>' : '';
-      html += `<div class="task${bCls}${isDone?' done':''}" style="--tc:${C[t.c]||'var(--border)'}" onclick="toggleTask('${t.id}')">
+      html += `<div class="task${bCls}${isDone?' done':''}" data-id="${t.id}" style="--tc:${C[t.c]||'var(--border)'}${t.locked?';cursor:default':''}"${t.locked?'':` onclick="toggleTask('${t.id}')"`}>
         <div class="t-chk">${isDone?'✓':''}</div>
         <div class="t-body">
           <div class="t-title">${t.t}</div>
           ${t.m?`<div class="t-meta">${t.m}</div>`:''}
-          <div>${t.bl&&bc?`<span class="bdg ${bc}">${t.bl}</span>`:''} ${roleBdg}${t.dl?`<span class="bdg ${t.dlRed?'bdg-r':''}"${t.dlRed?'':' style="background:var(--bg3);color:var(--muted)"'}>${t.dl}</span>`:''}</div>
+          ${t.sub?`<div class="t-meta">${t.sub}</div>`:''}
+          <div>${t.bl&&bc?`<span class="bdg ${bc}">${t.bl}</span>`:''} ${roleBdg}${t.dl?`<span class="bdg ${t.dlRed?'bdg-r':''}"${t.dlRed?'':' style="background:var(--bg3);color:var(--muted)"'}>${t.dl}</span>`:''}${(t.tags||[]).map(x => `<span class="bdg ${x.cls||''}" style="margin-left:3px;${x.style||''}">${x.text}</span>`).join('')}</div>
         </div>${t.freqLbl?`<div class="t-freq">${t.freqLbl}</div>`:''}</div>`;
     });
   }
@@ -919,7 +947,7 @@ function updateStats(tasks) {
     document.getElementById('prog-pct').textContent='—';
     return;
   }
-  const total=tasks.length, doneN=tasks.filter(t=>done[t.id]).length, pct=Math.round(doneN/total*100);
+  const total=tasks.length, doneN=tasks.filter(t=>t.locked||done[t.id]).length, pct=Math.round(doneN/total*100);
   document.getElementById('s-tot').textContent=total;
   document.getElementById('s-don').textContent=doneN;
   document.getElementById('s-lft').textContent=total-doneN;
@@ -1221,6 +1249,93 @@ function sbFetch(table, query) {
 
 function escHtml(str) {
   return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── PORTAL STATUS (Кърджали / Раднево) — само четене ─────────────────
+var portalStatus = {};       // store -> {completions, checklist, at}
+var portalRecurring = null;  // recurring_tasks, общи за всички обекти
+var portalRecurringReq = null;
+var PORTAL_GREY = 'background:var(--bg3);color:var(--muted)';
+
+function localISO(d) {
+  return d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1) + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
+}
+function ddmm(iso) {
+  return iso ? iso.slice(8, 10) + '.' + iso.slice(5, 7) : '';
+}
+function hhmm(d) {
+  return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
+}
+
+function loadPortalStatus(store) {
+  var now = new Date();
+  var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() + 6) % 7);
+  var wk = isoWeekKey(now).split('-W');
+  var st = encodeURIComponent(store);
+  if (!portalRecurringReq) {
+    portalRecurringReq = sbFetch('recurring_tasks', 'active=eq.true&select=id,title,department,due_weekdays,due_weekday,due_time,target_stores')
+      .then(function(r) { portalRecurring = Array.isArray(r) ? r : []; })
+      .catch(function() { portalRecurringReq = null; });
+  }
+  return Promise.all([
+    sbFetch('task_completions', 'store_name=eq.' + st + '&completion_date=gte.' + localISO(monday) + '&select=task_id,recurring_task_id,status,completion_date,completed_by,postponed_to'),
+    sbFetch('weekly_checklist', 'store_name=eq.' + st + '&year=eq.' + wk[0] + '&week_number=eq.' + (+wk[1]) + '&select=metric_key,portal_value,control_value'),
+    portalRecurringReq
+  ]).then(function(res) {
+    var checklist = {};
+    (Array.isArray(res[1]) ? res[1] : []).forEach(function(c) { checklist[c.metric_key] = c; });
+    portalStatus[store] = {completions: Array.isArray(res[0]) ? res[0] : [], checklist: checklist, at: new Date()};
+    renderToday();
+  }).catch(function() {});
+}
+
+// Запис от task_completions за обекта; 'done' има предимство пред 'postponed', после по-новият
+function portalCompletion(store, key, id, dateISO) {
+  var ps = portalStatus[store];
+  if (!ps) return null;
+  var hit = null;
+  ps.completions.forEach(function(c) {
+    if (c[key] !== id || (dateISO && c.completion_date !== dateISO)) return;
+    var cDone = c.status === 'done', hDone = hit && hit.status === 'done';
+    if (!hit || (cDone && !hDone) || (cDone === hDone && c.completion_date > hit.completion_date)) hit = c;
+  });
+  return hit;
+}
+
+// Статус на задача от портала според storeFilter: {locked, sub, tags}
+function portalStatusFields(key, id, dateISO) {
+  if (storeFilter === 'Всички') {
+    var tags = [];
+    [['Кърджали', 'К'], ['Раднево', 'Р']].forEach(function(s) {
+      if (!portalStatus[s[0]]) return;
+      var c = portalCompletion(s[0], key, id, dateISO);
+      var ok = !!(c && c.status === 'done');
+      tags.push({text: s[1] + ' ' + (ok ? '✓' : '✗'), cls: ok ? 'bdg-g' : '', style: ok ? '' : PORTAL_GREY});
+    });
+    return {tags: tags};
+  }
+  var c = portalCompletion(storeFilter, key, id, dateISO);
+  if (!c) return {};
+  if (c.status === 'done') return {locked: true, sub: 'изпълнено ' + ddmm(c.completion_date) + (c.completed_by ? ' · ' + escHtml(c.completed_by) : '')};
+  if (c.status === 'postponed') return {tags: [{text: 'отложено до ' + ddmm(c.postponed_to), style: PORTAL_GREY}]};
+  return {};
+}
+
+// target_stores: [] или null = за всички обекти
+function storeMatch(ts) {
+  return storeFilter === 'Всички' || !ts || !ts.length || ts.indexOf(storeFilter) !== -1;
+}
+
+// Стойност от weekly_checklist на Кърджали за ред от REG_885: {val, ok}
+function reg885Checklist(r) {
+  var ps = portalStatus['Кърджали'];
+  var row = r.metric && ps ? ps.checklist[r.metric] : null;
+  if (!row) return null;
+  var val = r.metric === 'preocenka' ? row.control_value : row.portal_value;
+  if (val == null || val === '') return null;
+  var xy = /^(\d+)\/(\d+)$/.exec(val);
+  var ok = (r.metric === 'revizia_953' || r.metric === 'preocenka') ? val === 'da' : !!(xy && +xy[1] === +xy[2]);
+  return {val: val, ok: ok};
 }
 
 // RM tasks that require control from Regional Manager
