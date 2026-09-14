@@ -32,6 +32,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .nav::-webkit-scrollbar{display:none}
 .nav-btn{flex-shrink:0;padding:6px 13px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
 .nav-btn.on{background:var(--accent);color:#0f1923;border-color:var(--accent);font-weight:500}
+.store-sw{display:flex;gap:4px;margin:12px 0 2px}
+.store-btn{flex-shrink:0;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:var(--font);font-size:11px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.store-btn.on{background:var(--accent);color:#0f1923;border-color:var(--accent);font-weight:500}
 /* MAIN */
 .main{padding:14px 16px;max-width:680px;margin:0 auto;padding-bottom:40px}
 .panel{display:none}.panel.on{display:block}
@@ -184,6 +187,11 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
     <div class="stat"><div class="stat-n" id="s-lft" style="color:var(--red)">0</div><div class="stat-l">Остават</div></div>
   </div>
   <div class="prog-row"><div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div><span class="prog-pct" id="prog-pct">0%</span></div>
+  <div class="store-sw" id="store-sw">
+    <button class="store-btn" data-store="Всички" onclick="setStore('Всички')">Всички</button>
+    <button class="store-btn" data-store="Кърджали" onclick="setStore('Кърджали')">Кърджали</button>
+    <button class="store-btn" data-store="Раднево" onclick="setStore('Раднево')">Раднево</button>
+  </div>
   <div id="task-list"></div>
 </div>
 
@@ -468,6 +476,22 @@ const BASE = {
   ],
 };
 
+// ── REG 885 (Кърджали без управител) ─────────────────────────────────
+// Източник: docs/Регламент_Кърджали_без_управител.md, секция 1. D4 не е включен (без потвърден собственик).
+const OWNER_885_DEPUTY = 'Мария';
+const REG_885 = [
+  {id:'k-d1',code:'D1',t:'Дневен план на екипа е издаден и проверен',owner:'Любомир / Кръстина → контрол РМ',src:'Чек лист Мениджър Q28; ДХ РС т.5; Дневен план.xlsx',sap:'',freq:'daily'},
+  {id:'k-d2',code:'D2',t:'Присъствена форма попълнена за деня (отсъствия, болнични до 2 раб. дни)',owner:OWNER_885_DEPUTY+' → РМ',src:'ПРАВИЛА (Заповед 2/16.09.2024)',sap:'',freq:'daily'},
+  {id:'k-d3',code:'D3',t:'Етикети за сменени цени / нови промоции разпечатани и поставени',owner:'Кристина',src:'ДХ Главен касиер т.19, т.21',sap:'',freq:'daily'},
+  {id:'k-d5',code:'D5',t:'График транспорт + онлайн таблица попълнени',owner:'Кристина',src:'ДХ Гл. касиер т.16',sap:'',freq:'daily'},
+  {id:'k-d6',code:'D6',t:'Рекламации приети и проследени',owner:'Кристина',src:'ДХ Гл. касиер т.18; Рекламации_и_сервизи.docx',sap:'ZINVCOUNT',freq:'daily'},
+  {id:'k-d7',code:'D7',t:'Клиентски заявки при липса на наличност; заявки към доставчици',owner:'Мария',src:'ДХ Гл. касиер т.17; КЛИЕНТСКИ_ПОРЪЧКИ.docx',sap:'MB51 (951/952)',freq:'daily'},
+  {id:'k-d8',code:'D8',t:'Приета стока подредена в склад/зала до 1 ден; няма неприета стока >1 ден',owner:'Реджеп → РМ',src:'Чек лист Мениджър Q40',sap:'VL06I',freq:'daily'},
+  {id:'k-d9',code:'D9',t:'Зала: чистота, музика, осветление, цени, етикети, проходи, униформи, поздрав',owner:'Любомир / Кръстина',src:'Чек лист Мениджър Q1–Q29',sap:'',freq:'daily'},
+  {id:'k-d10',code:'D10',t:'Склад: подредба, безопасност, покрити сухи смеси, зона пушене',owner:'Реджеп',src:'Чек лист Мениджър Q34–Q39',sap:'',freq:'daily'},
+  {id:'k-d11',code:'D11',t:'Обратна връзка по задачи от бюлетина (дори „нищо за подаване“)',owner:OWNER_885_DEPUTY+' → РМ',src:'текущо BASE в приложението',sap:'',freq:'daily'},
+];
+
 // ── SAP DATA ───────────────────────────────────────────────────────
 const SAP_DATA = [
   {code:'MB51',name:'Справка движения',cat:'Справки',
@@ -661,6 +685,7 @@ const SAP_DATA = [
 
 // ── STATE ──────────────────────────────────────────────────────────
 let done = JSON.parse(localStorage.getItem('tm-done') || '{}');
+let storeFilter = localStorage.getItem('tm-store') || 'Всички';
 let bulletin = JSON.parse(localStorage.getItem('tm-bulletin') || '[]');
 let deferredPrompt = null;
 
@@ -764,7 +789,21 @@ function renderToday() {
     bulletin: true
   }));
 
-  const tasks = [...base, ...portalForToday, ...bTasks];
+  // Кърджали 885 — дневни задачи на обекта
+  const regTasks = (dow >= 1 && dow <= 5 && storeFilter !== 'Раднево')
+    ? REG_885.filter(r => r.freq === 'daily').map(r => ({
+        id: r.id,
+        t: r.t,
+        m: [r.owner, r.src, r.sap].filter(Boolean).join(' · '),
+        c: '',
+        bl: 'Кърджали — обектът трябва да',
+        role: null
+      }))
+    : [];
+
+  const tasks = [...base, ...portalForToday, ...bTasks, ...regTasks];
+
+  document.querySelectorAll('.store-btn').forEach(b => b.classList.toggle('on', b.dataset.store === storeFilter));
 
   document.getElementById('today-title').textContent = dayName;
   const n = new Date();
@@ -799,6 +838,12 @@ function renderToday() {
   }
   document.getElementById('task-list').innerHTML = html;
   updateStats(tasks);
+}
+
+function setStore(s) {
+  storeFilter = s;
+  localStorage.setItem('tm-store', s);
+  renderToday();
 }
 
 function toggleTask(id) {
