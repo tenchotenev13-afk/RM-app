@@ -443,8 +443,8 @@ const C = {r:'var(--red)',a:'var(--amber)',b:'var(--blue)',g:'var(--green)'};
 // ── BASE TASKS (permanent, per weekday) ────────────────────────────
 const BASE = {
   1:[
-    {id:'m1',t:'Справка минуси — незакрити движения',m:'От Даяна Иванова • работи само по актуалните таблици',c:'r',bl:'Критично',role:'rm'},
-    {id:'m2',t:'Снимка колоранти до 11:00ч',m:'p.velikova@temax.bg — всички обекти',c:'r',bl:'Срок 11:00',role:'rm'},
+    {id:'m1',t:'Справка минуси — незакрити движения',m:'От Даяна Иванова • работи само по актуалните таблици',c:'r',bl:'Критично',role:'rm',rt:'03c44560-9572-4274-ad53-5228d61b4de7'},
+    {id:'m2',t:'Снимка колоранти до 11:00ч',m:'p.velikova@temax.bg — всички обекти',c:'r',bl:'Срок 11:00',role:'rm',rt:'17d3a83e-d29c-459f-b539-ed19c4d3d691'},
     {id:'m3',t:'Провери обратни движения (952/954)',m:'MB51 → завод → 951+952 → незакрити двойки = проблем',c:'b',bl:'Контрол SAP',role:'rm'},
     {id:'m3b',t:'VL06I — стари А/В документи',m:'Входящи доставки без статус С от >3 дни → питай управителя',c:'r',bl:'Контрол SAP',role:'rm'},
     {id:'m4',t:'Обратна връзка по задачи от бюлетина',m:'Задължително — дори „нямаме нищо за подаване"',c:'a',bl:'Комуникация',role:'rm'},
@@ -492,10 +492,10 @@ const REG_885 = [
   {id:'k-d8',code:'D8',t:'Приета стока подредена в склад/зала до 1 ден; няма неприета стока >1 ден',owner:'Реджеп → РМ',src:'Чек лист Мениджър Q40',sap:'VL06I',freq:'daily'},
   {id:'k-d9',code:'D9',t:'Зала: чистота, музика, осветление, цени, етикети, проходи, униформи, поздрав',owner:'Любомир / Кръстина',src:'Чек лист Мениджър Q1–Q29',sap:'',freq:'daily'},
   {id:'k-d10',code:'D10',t:'Склад: подредба, безопасност, покрити сухи смеси, зона пушене',owner:'Реджеп',src:'Чек лист Мениджър Q34–Q39',sap:'',freq:'daily'},
-  {id:'k-w1',code:'W1',t:'Ревизии качени до 16:00',owner:'Реджеп → РМ проверява',src:'BASE w3; ИНВЕНТАРИЗАЦИИ.docx',sap:'ZINVCHECK',freq:'weekly',dow:[1,2,3],deadline:'до сряда 16:00',metric:'revizia_953'},
-  {id:'k-w2',code:'W2',t:'Стока за връщане — подадена в портала',owner:'Реджеп',src:'Портал → За връщане; СТОКА_ЗА_ВРЪЩАНЕ.docx',sap:'ZINVCOUNT',freq:'weekly',dow:3,metric:'stoka_vrashtane'},
-  {id:'k-w3',code:'W3',t:'Разлики по прием — подадени в портала',owner:'Реджеп',src:'Портал → Разлики; РАЗЛИКИ_ПО_ПРИЕМ_*.docx',sap:'',freq:'weekly',dow:3},
-  {id:'k-w4',code:'W4',t:'Срокове на годност — качени',owner:'Любомир / Кръстина',src:'BASE w5',sap:'',freq:'weekly',dow:3},
+  {id:'k-w1',code:'W1',t:'Ревизии качени до 16:00',owner:'Реджеп → РМ проверява',src:'BASE w3; ИНВЕНТАРИЗАЦИИ.docx',sap:'ZINVCHECK',freq:'weekly',dow:[1,2,3],deadline:'до сряда 16:00',metric:'revizia_953',rt:'74da41e4-494f-48cc-a434-79bfc04fc243'},
+  {id:'k-w2',code:'W2',t:'Стока за връщане — подадена в портала',owner:'Реджеп',src:'Портал → За връщане; СТОКА_ЗА_ВРЪЩАНЕ.docx',sap:'ZINVCOUNT',freq:'weekly',dow:3,metric:'stoka_vrashtane',rt:'0a20f6e8-c526-400b-bed5-57194f35e4e5'},
+  {id:'k-w3',code:'W3',t:'Разлики по прием — подадени в портала',owner:'Реджеп',src:'Портал → Разлики; РАЗЛИКИ_ПО_ПРИЕМ_*.docx',sap:'',freq:'weekly',dow:3,rt:'e9d418af-311a-45ec-b4da-0f9ad69205e7'},
+  {id:'k-w4',code:'W4',t:'Срокове на годност — качени',owner:'Любомир / Кръстина',src:'BASE w5',sap:'',freq:'weekly',dow:3,rt:'31351174-4182-46a1-a1ce-91e877066297'},
   {id:'k-w5',code:'W5',t:'Анализ на камери',owner:'РМ',src:'регионални чек лист; Чек лист наблюдение на Камери.xlsx',sap:'',freq:'weekly',dow:5},
   {id:'k-w6',code:'W6',t:'Седмично обобщение минуси + обратни движения',owner:'РМ',src:'BASE f3',sap:'MB51',freq:'weekly',dow:5},
   {id:'k-w10',code:'W10',t:'Проверка на застояла стока за връщане >14 дни',owner:'Реджеп → РМ',src:'Чек лист Мениджър Q41',sap:'ZINVCOUNT',freq:'weekly',dow:1,label:'тази седмица'},
@@ -832,11 +832,14 @@ function renderToday() {
   }
 
   // Постоянни задачи от портала — ден 0=пон … 6=нед
+  // Постоянна задача, свързана (rt) с видим ред от BASE или REG_885, не се показва отделно
   const portalDow = (dow + 6) % 7;
   const todayLocal = localISO(now);
+  const regVisible = dow >= 1 && dow <= 5 && storeFilter !== 'Раднево';
+  const linkedRt = new Set([...base, ...(regVisible ? REG_885.filter(r => reg885Active(r, now)) : [])].map(x => x.rt).filter(Boolean));
   const recTasks = (portalRecurring || []).filter(r => {
     const days = r.due_weekdays || (r.due_weekday != null ? [r.due_weekday] : null);
-    return days && days.includes(portalDow) && storeMatch(r.target_stores);
+    return days && days.includes(portalDow) && storeMatch(r.target_stores) && !linkedRt.has(r.id);
   }).map(r => {
     const isRm = r.department === 'warehouse' || r.department === 'admin';
     const dept = DEPT_LABELS[r.department] || {label: r.department || '', icon: '📋'};
@@ -863,14 +866,18 @@ function renderToday() {
   }));
 
   // Кърджали 885 — дневни → седмични за днес → месечни активни днес
-  const regTasks = (dow >= 1 && dow <= 5 && storeFilter !== 'Раднево')
+  const regTasks = regVisible
     ? ['daily', 'weekly', 'monthly'].flatMap(f => REG_885.filter(r => r.freq === f && reg885Active(r, now))).map(r => {
         const due = r.due === 'last' ? new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() : r.due;
         const dueLbl = due ? 'срок ' + (due < 10 ? '0' : '') + due + '.' + (now.getMonth() < 9 ? '0' : '') + (now.getMonth() + 1) : '';
         const cl = reg885Checklist(r);
+        const rc = r.rt ? portalCompletion('Кърджали', 'recurring_task_id', r.rt, todayLocal) : null;
+        const rcDone = !!(rc && rc.status === 'done');
         return {
-          locked: !!(cl && cl.ok),
-          tags: cl ? [{text: 'чек лист: ' + escHtml(cl.val), cls: cl.ok ? 'bdg-g' : '', style: cl.ok ? '' : PORTAL_GREY}] : [],
+          locked: !!(cl && cl.ok) || rcDone,
+          sub: rcDone ? 'изпълнено ' + portalDoneTime(rc) + (rc.completed_by ? ' · ' + escHtml(rc.completed_by) : '') : '',
+          tags: (cl ? [{text: 'чек лист: ' + escHtml(cl.val), cls: cl.ok ? 'bdg-g' : '', style: cl.ok ? '' : PORTAL_GREY}] : [])
+            .concat(rc && rc.status === 'postponed' ? [{text: 'отложено до ' + ddmm(rc.postponed_to), style: PORTAL_GREY}] : []),
           id: r.id + (r.freq === 'weekly' ? '@' + isoWeekKey(now) : r.freq === 'monthly' ? '@' + monthKey(now) : ''),
           t: r.t,
           m: [r.owner, r.src, r.sap].filter(Boolean).join(' · '),
@@ -884,7 +891,7 @@ function renderToday() {
       })
     : [];
 
-  const tasks = [...base, ...portalForToday, ...recTasks, ...bTasks, ...regTasks];
+  const tasks = [...base.map(t => t.rt ? Object.assign({}, t, rtBaseFields(t.rt, todayLocal)) : t), ...portalForToday, ...recTasks, ...bTasks, ...regTasks];
 
   document.querySelectorAll('.store-btn').forEach(b => b.classList.toggle('on', b.dataset.store === storeFilter));
 
@@ -1278,7 +1285,7 @@ function loadPortalStatus(store) {
       .catch(function() { portalRecurringReq = null; });
   }
   return Promise.all([
-    sbFetch('task_completions', 'store_name=eq.' + st + '&completion_date=gte.' + localISO(monday) + '&select=task_id,recurring_task_id,status,completion_date,completed_by,postponed_to'),
+    sbFetch('task_completions', 'store_name=eq.' + st + '&completion_date=gte.' + localISO(monday) + '&select=task_id,recurring_task_id,status,completion_date,completed_at,completed_by,postponed_to'),
     sbFetch('weekly_checklist', 'store_name=eq.' + st + '&year=eq.' + wk[0] + '&week_number=eq.' + (+wk[1]) + '&select=metric_key,portal_value,control_value'),
     portalRecurringReq
   ]).then(function(res) {
@@ -1319,6 +1326,26 @@ function portalStatusFields(key, id, dateISO) {
   if (c.status === 'done') return {locked: true, sub: 'изпълнено ' + ddmm(c.completion_date) + (c.completed_by ? ' · ' + escHtml(c.completed_by) : '')};
   if (c.status === 'postponed') return {tags: [{text: 'отложено до ' + ddmm(c.postponed_to), style: PORTAL_GREY}]};
   return {};
+}
+
+// Час на изпълнение от completed_at (UTC) в местно време
+function portalDoneTime(c) {
+  return c.completed_at ? hhmm(new Date(c.completed_at)) : '';
+}
+
+// Ред от BASE със rt: етикет за статуса на обекта, отметката остава ръчна
+function rtBaseFields(rt, dateISO) {
+  var all = storeFilter === 'Всички';
+  var stores = all ? [['Кърджали', 'К'], ['Раднево', 'Р']] : [[storeFilter, 'обектът']];
+  var tags = [];
+  stores.forEach(function(s) {
+    if (!portalStatus[s[0]]) return;
+    var c = portalCompletion(s[0], 'recurring_task_id', rt, dateISO);
+    var ok = !!(c && c.status === 'done');
+    var extra = ok && !all ? ' ' + portalDoneTime(c) + (c.completed_by ? ' · ' + escHtml(c.completed_by) : '') : '';
+    tags.push({text: s[1] + ' ' + (ok ? '✓' : '✗') + extra, cls: ok ? 'bdg-g' : '', style: ok ? '' : PORTAL_GREY});
+  });
+  return {tags: tags};
 }
 
 // target_stores: [] или null = за всички обекти
