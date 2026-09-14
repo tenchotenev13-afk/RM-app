@@ -799,7 +799,7 @@ function goTo(panelId, filter) {
 function renderToday() {
   const dow = new Date().getDay();
   const now = new Date();
-  const dayISO = now.toISOString().slice(0,10);
+  const dayISO = localISO(now);
   const base = BASE[dow] || [];
   const dayName = DAY[dow];
   const DAY_BG_SHORT = ['Нед','Пон','Вт','Ср','Чет','Пет','Съб'];
@@ -808,7 +808,7 @@ function renderToday() {
   var weekStart = new Date(now);
   weekStart.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
   weekStart.setHours(0,0,0,0);
-  var weekStartISO = weekStart.toISOString().slice(0,10);
+  var weekStartISO = localISO(weekStart);
 
   // Portal tasks - read directly from portalTasks
   var portalForToday = [];
@@ -852,8 +852,9 @@ function renderToday() {
   const regVisible = dow >= 1 && dow <= 5 && storeFilter !== 'Раднево';
   const linkedRt = new Set([...base, ...(regVisible ? REG_885.filter(r => reg885Active(r, now)) : [])].map(x => x.rt).filter(Boolean));
   const recTasks = (portalRecurring || []).filter(r => {
-    const days = r.due_weekdays || (r.due_weekday != null ? [r.due_weekday] : null);
-    return days && days.includes(portalDow) && storeMatch(r.target_stores) && !linkedRt.has(r.id);
+    // без due_weekdays и due_weekday — всеки работен ден (пон–пет)
+    const days = r.due_weekdays || (r.due_weekday != null ? [r.due_weekday] : [0, 1, 2, 3, 4]);
+    return days.includes(portalDow) && storeMatch(r.target_stores) && !linkedRt.has(r.id);
   }).map(r => {
     const isRm = r.department === 'warehouse' || r.department === 'admin';
     const dept = DEPT_LABELS[r.department] || {label: r.department || '', icon: '📋'};
@@ -1180,7 +1181,7 @@ function checkMissedReminders() {
   if (dow === 0 || dow === 6) return;
   // If opening between 08:00-14:00 and morning reminder not sent yet → send now
   var lastSent = localStorage.getItem('tm-last-notif-day');
-  var today = n.toISOString().slice(0, 10);
+  var today = localISO(n);
   if (lastSent === today) return; // already sent today
   if (h >= 8) {
     sendReminderIfNeeded(8, dow);
@@ -1310,6 +1311,7 @@ function loadPortalStatus(store) {
     (Array.isArray(res[1]) ? res[1] : []).forEach(function(c) { checklist[c.metric_key] = c; });
     portalStatus[store] = {completions: Array.isArray(res[0]) ? res[0] : [], checklist: checklist, at: new Date()};
     renderToday();
+    renderWeekPortalTasks();
   }).catch(function() {});
 }
 
@@ -1400,7 +1402,7 @@ function injectPortalTasksToday(tasks, bulletinWeek) {
   var dow = now.getDay();
   if (dow === 0 || dow === 6) return; // Skip weekends
 
-  var dayISO = now.toISOString().slice(0, 10);
+  var dayISO = localISO(now);
   var DAY_BG_SHORT = ['Нед','Пон','Вт','Ср','Чет','Пет','Съб'];
 
   // Filter tasks: today + overdue from this week (not completed)
@@ -1408,7 +1410,7 @@ function injectPortalTasksToday(tasks, bulletinWeek) {
   var weekStart = new Date(now);
   weekStart.setDate(now.getDate() - (dow === 0 ? 6 : dow - 1));
   weekStart.setHours(0,0,0,0);
-  var weekStartISO = weekStart.toISOString().slice(0,10);
+  var weekStartISO = localISO(weekStart);
 
   var todayTasks = tasks.filter(function(t) {
     if (!t.due_date) return true; // No date = show every workday
@@ -1466,7 +1468,7 @@ function showCorsHelp() {
 function getTasksForNotif(dow) {
   var base = BASE[dow] || [];
   var dayName = DAY[dow];
-  var dayISO = new Date().toISOString().slice(0,10);
+  var dayISO = localISO(new Date());
   var portal = portalTasks.filter(function(t) {
     if (!t.due_date) return dow >= 1 && dow <= 5;
     return t.due_date === dayISO;
@@ -1964,10 +1966,10 @@ function renderWeekPortalTasks() {
   weekEnd.setDate(weekStart.getDate() + 4); // Friday
   weekEnd.setHours(23,59,59,999);
 
-  var weekStartISO = weekStart.toISOString().slice(0,10);
+  var weekStartISO = localISO(weekStart);
   var weekEndDate = new Date(weekStart);
   weekEndDate.setDate(weekStart.getDate() + 4);
-  var weekEndISO = weekEndDate.toISOString().slice(0,10);
+  var weekEndISO = localISO(weekEndDate);
 
   var DAY_NAMES = ['Нед','Пон','Вт','Ср','Чет','Пет','Съб'];
   var COLORS = {trade:'var(--green)',warehouse:'var(--blue)',admin:'var(--muted)'};
@@ -1977,8 +1979,16 @@ function renderWeekPortalTasks() {
   var byDay = {1:[],2:[],3:[],4:[],5:[]};
   var noDayTasks = [];
 
+  // Статус от портала — само при избран обект; при 'Всички' както досега
+  var weekStatus = function(t) { return storeFilter === 'Всички' ? {} : portalStatusFields('task_id', t.id); };
+  var weekStatusHtml = function(st) {
+    return (st.sub ? '<div style="font-size:9px;color:var(--muted);margin-top:1px;font-family:var(--mono)">' + st.sub + '</div>' : '') +
+      (st.tags || []).map(function(x) { return '<span class="bdg" style="' + (x.style || '') + '">' + x.text + '</span>'; }).join('');
+  };
+
   console.log('renderWeekPortalTasks: portalTasks='+portalTasks.length+' weekStart='+weekStartISO+' weekEnd='+weekEndISO);
   portalTasks.forEach(function(t) {
+    if (!storeMatch(t.target_stores)) return;
     if (!t.due_date) {
       noDayTasks.push(t);
       console.log('  no-date task:', t.title);
@@ -2015,13 +2025,15 @@ function renderWeekPortalTasks() {
       html += '<div style="font-size:10px;color:var(--muted);font-style:italic">Свободен</div>';
     } else {
       dayTasks.forEach(function(t) {
-        var isDone = !!done['portal-' + t.id];
+        var st = weekStatus(t);
+        var isDone = !!st.locked || !!done['portal-' + t.id];
         var color = COLORS[t.department] || 'var(--muted)';
         var icon = ICONS[t.department] || '📋';
         var isRm = t.department === 'warehouse' || t.department === 'admin';
-        html += '<div style="padding:4px 6px;border-radius:6px;margin-bottom:3px;background:' + (isDone?'rgba(78,201,148,.08)':'var(--bg3)') + ';border-left:2px solid ' + color + ';cursor:pointer;' + (isDone?'opacity:.5':'') + '" onclick="toggleTask(\'portal-' + t.id + '\')">';
+        html += '<div data-id="portal-' + t.id + '" style="padding:4px 6px;border-radius:6px;margin-bottom:3px;background:' + (isDone?'rgba(78,201,148,.08)':'var(--bg3)') + ';border-left:2px solid ' + color + ';' + (st.locked?'cursor:default;':'cursor:pointer;') + (isDone?'opacity:.5':'') + '"' + (st.locked ? '' : ' onclick="toggleTask(\'portal-' + t.id + '\')"') + '>';
         html += '<div style="font-size:11px;font-weight:500;' + (isDone?'text-decoration:line-through':'') + '">' + (t.title||'') + '</div>';
         html += '<div style="font-size:10px;color:var(--muted);margin-top:1px">' + (isRm?'<span style="color:var(--blue)">РМ</span>':'<span style="color:var(--green)">Магазин</span>') + '</div>';
+        html += weekStatusHtml(st);
         html += '</div>';
       });
     }
@@ -2033,14 +2045,16 @@ function renderWeekPortalTasks() {
   if (noDayTasks.length) {
     html += '<div class="slbl" style="margin-top:10px">За цялата седмица</div>';
     noDayTasks.forEach(function(t) {
-      var isDone = !!done['portal-' + t.id];
+      var st = weekStatus(t);
+      var isDone = !!st.locked || !!done['portal-' + t.id];
       var color = COLORS[t.department] || 'var(--muted)';
       var icon = ICONS[t.department] || '📋';
       var isRm = t.department === 'warehouse' || t.department === 'admin';
-      html += '<div class="task' + (isDone?' done':'') + '" style="--tc:' + color + '" onclick="toggleTask(\'portal-' + t.id + '\')">';
+      html += '<div class="task' + (isDone?' done':'') + '" data-id="portal-' + t.id + '" style="--tc:' + color + (st.locked?';cursor:default':'') + '"' + (st.locked ? '' : ' onclick="toggleTask(\'portal-' + t.id + '\')"') + '>';
       html += '<div class="t-chk">' + (isDone?'✓':'') + '</div>';
       html += '<div class="t-body"><div class="t-title">' + (t.title||'') + '</div>';
       html += '<div class="t-meta">' + icon + ' ' + (t.department||'') + (isRm?' · <span style="color:var(--blue)">РМ</span>':' · <span style="color:var(--green)">Магазин</span>') + '</div>';
+      html += weekStatusHtml(st);
       html += '</div></div>';
     });
   }
@@ -2504,7 +2518,7 @@ function filterTeam(v) { renderTeam(v); }
 
 // ── DAILY RESET ──────────────────────────────────────────────
 function checkDailyReset() {
-  var today = new Date().toISOString().slice(0,10);
+  var today = localISO(new Date());
   var lastReset = localStorage.getItem('tm-last-reset');
   if (lastReset !== today) {
     // Седмичните/месечните отметки (id@период) остават за текущата седмица и месец
