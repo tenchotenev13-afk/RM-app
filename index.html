@@ -200,6 +200,7 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
 
 <!-- WEEK -->
 <div class="panel" id="p-week">
+  <div id="wk-rm-only">
   <div class="slbl" style="margin-top:2px">Модел на работната седмица</div>
   <div style="display:flex;gap:8px;margin-bottom:10px;font-size:11px;align-items:center">
     <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:50%;background:var(--blue);display:inline-block"></span> Задача на РМ</span>
@@ -238,6 +239,8 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
   <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px;font-size:12px;color:var(--text);line-height:1.7">
     📍 <strong>Кърджали</strong> · 1ч &nbsp;|&nbsp; 📍 <strong>Раднево</strong> · 1ч<br>
     <span style="color:var(--muted)">Редувай обектите — не ходи два пъти подред на едно. С.1+С.4 → Контролна карта · С.2 → Планограми + ревизия</span>
+  </div>
+
   </div>
 
   <div class="slbl" style="margin-top:16px">Задачи от Т-Бюлетин тази седмица</div>
@@ -348,6 +351,7 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
 
 <!-- SETTINGS -->
 <div class="panel" id="p-settings">
+  <div id="set-notif">
   <div class="slbl" style="margin-top:2px">Нотификации</div>
   <div class="s-row"><div><div class="s-lbl">Push нотификации</div><div class="s-sub">Напомняния в браузъра</div></div>
     <label class="toggle"><input type="checkbox" id="nt" onchange="toggleNotifSetting(this.checked)"><span class="slider"></span></label></div>
@@ -370,6 +374,8 @@ input:checked+.slider::before{transform:translateX(18px);background:#0f1923}
     <div style="color:var(--muted);margin-bottom:6px">1. Първо добави на началния екран (вижте по-долу)</div>
     <div style="color:var(--muted);margin-bottom:6px">2. Отвори от началния екран → Settings → ТеМАХ РМ → Notifications → Allow</div>
     <div style="color:var(--red);font-size:11px">⚠ iPhone — нотификации работят САМО ако приложението е добавено на началния екран и отворено от там, не от Safari</div>
+  </div>
+
   </div>
 
   <div class="slbl">Инсталиране на началния екран</div>
@@ -737,26 +743,36 @@ const SAP_DATA = [
 
 // ── STATE ──────────────────────────────────────────────────────────
 let done = JSON.parse(localStorage.getItem('tm-done') || '{}');
-let storeFilter = localStorage.getItem('tm-store') || 'Всички';
+// Режим управител: ?m=kardzhali | ?m=radnevo | ?m=rm (връща нормалния режим).
+// Пази се в 'tm-mode', защото инсталираното PWA стартира от start_url "./" без параметъра.
+const MGR_STORES = {kardzhali: 'Кърджали', radnevo: 'Раднево'};
+let mgrStore = (function() {
+  var p = new URLSearchParams(location.search).get('m');
+  if (p === 'rm') { localStorage.removeItem('tm-mode'); return ''; }
+  if (MGR_STORES[p]) { localStorage.setItem('tm-mode', p); return MGR_STORES[p]; }
+  return MGR_STORES[localStorage.getItem('tm-mode')] || '';
+})();
+let storeFilter = mgrStore || localStorage.getItem('tm-store') || 'Всички';
 let bulletin = JSON.parse(localStorage.getItem('tm-bulletin') || '[]');
 let deferredPrompt = null;
 
 // ── INIT ───────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
+  applyMgrMode();
   updateHeader();
   renderToday();
   renderSap();
   renderProcess();
   renderTeam();
   renderEditList();
-  setTimeout(initOneSignal, 1500);
+  if (!mgrStore) setTimeout(initOneSignal, 1500);
   checkDailyReset();
   setTimeout(loadPortalBulletin, 1000);
-  setTimeout(() => { loadPortalStatus('Кърджали'); loadPortalStatus('Раднево'); }, 1000);
+  setTimeout(() => { if (mgrStore) { loadPortalStatus(mgrStore); } else { loadPortalStatus('Кърджали'); loadPortalStatus('Раднево'); } }, 1000);
   highlightToday();
   checkNotif();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
-  scheduleReminders();
+  if (!mgrStore) scheduleReminders();
 });
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
 
@@ -764,6 +780,21 @@ function updateHeader() {
   const n = new Date();
   document.getElementById('hdr-date').innerHTML = DAY[n.getDay()]+'<br>'+n.getDate()+' '+MON[n.getMonth()];
 }
+// Режим управител: скрива екраните и задачите на РМ
+function applyMgrMode() {
+  if (!mgrStore) return;
+  document.querySelector('.hdr-title').textContent = 'ТеМАХ';
+  document.querySelector('.hdr-sub').textContent = 'Управител · ' + mgrStore;
+  document.querySelectorAll('.nav-btn').forEach(function(b) {
+    var oc = b.getAttribute('onclick') || '';
+    if (oc.includes("nav('month'") || oc.includes("nav('team'")) b.style.display = 'none';
+  });
+  ['store-sw', 'notif-btn', 'wk-rm-only', 'set-notif'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
 function highlightToday() {
   const d = new Date().getDay();
   const m = {1:'dc-1',2:'dc-2',3:'dc-3',4:'dc-4',5:'dc-5'};
@@ -800,7 +831,7 @@ function renderToday() {
   const dow = new Date().getDay();
   const now = new Date();
   const dayISO = localISO(now);
-  const base = BASE[dow] || [];
+  const base = mgrStore ? [] : (BASE[dow] || []);
   const dayName = DAY[dow];
   const DAY_BG_SHORT = ['Нед','Пон','Вт','Ср','Чет','Пет','Съб'];
 
@@ -849,7 +880,7 @@ function renderToday() {
   // Постоянна задача, свързана (rt) с видим ред от BASE или REG_885, не се показва отделно
   const portalDow = (dow + 6) % 7;
   const todayLocal = localISO(now);
-  const regVisible = dow >= 1 && dow <= 5 && storeFilter !== 'Раднево';
+  const regVisible = !mgrStore && dow >= 1 && dow <= 5 && storeFilter !== 'Раднево';
   const linkedRt = new Set([...base, ...(regVisible ? REG_885.filter(r => reg885Active(r, now)) : [])].map(x => x.rt).filter(Boolean));
   const recTasks = (portalRecurring || []).filter(r => {
     // без due_weekdays и due_weekday — всеки работен ден (пон–пет)
@@ -933,7 +964,7 @@ function renderToday() {
       const isDone = !!t.locked || !!done[t.id];
       const bc = {r:'bdg-r',a:'bdg-a',b:'bdg-b',g:'bdg-g'}[t.c]||'';
       const bCls = t.bulletin ? ' bulletin' : '';
-      const roleBdg = t.role==='rm' ? '<span class="bdg" style="background:rgba(91,155,213,.2);color:var(--blue);margin-left:3px">РМ</span>'
+      const roleBdg = mgrStore ? '' : t.role==='rm' ? '<span class="bdg" style="background:rgba(91,155,213,.2);color:var(--blue);margin-left:3px">РМ</span>'
                     : t.role==='mag' ? '<span class="bdg" style="background:rgba(78,201,148,.2);color:var(--green);margin-left:3px">Магазин</span>' : '';
       html += `<div class="task${bCls}${isDone?' done':''}" data-id="${t.id}" style="--tc:${C[t.c]||'var(--border)'}${t.locked?';cursor:default':''}"${t.locked?'':` onclick="toggleTask('${t.id}')"`}>
         <div class="t-chk">${isDone?'✓':''}</div>
@@ -951,6 +982,7 @@ function renderToday() {
 }
 
 function setStore(s) {
+  if (mgrStore) return;
   storeFilter = s;
   localStorage.setItem('tm-store', s);
   renderToday();
