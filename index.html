@@ -1537,7 +1537,7 @@ function loadPortalBulletin() {
   var wk = getWeekNum(now);
   var yr = now.getFullYear();
 
-  sbFetch('bulletins', 'status=eq.published&order=published_at.desc&limit=1')
+  sbFetch('bulletins', 'status=eq.published&order=published_at.desc.nullslast&limit=1')
     .then(function(data) {
       if (!data || !data.length) {
         return sbFetch('bulletins', 'order=created_at.desc&limit=1');
