@@ -841,28 +841,18 @@ function renderToday() {
   weekStart.setHours(0,0,0,0);
   var weekStartISO = localISO(weekStart);
 
-  // Portal tasks - read directly from portalTasks
+  // Задачи от бюлетина — по правилата на портала: due_dates, starts_on, notice отпада
   var portalForToday = [];
   if (portalTasks && portalTasks.length) {
     portalTasks.forEach(function(t) {
+      if (taskIsNotice(t)) return;
       if (!storeMatch(t.target_stores)) return;
-      var st = portalStatusFields('task_id', t.id);
-      var show = false;
-      if (!t.due_date) {
-        show = dow >= 1 && dow <= 5;
-      } else if (t.due_date === dayISO) {
-        show = true;
-      } else if (t.due_date >= weekStartISO && t.due_date < dayISO) {
-        show = !done['portal-' + t.id] && !st.locked;
-      }
-      if (!show) return;
+      if (!taskIsDueOnDate(t, dayISO) || !taskInForce(t, dayISO)) return;
+      var st = portalStatusFields('task_id', t.id, dayISO);
       var isRmControl = t.department === 'warehouse' || t.department === 'admin';
       var dept = DEPT_LABELS[t.department] || {label: t.department || '', color: 'var(--muted)', icon: '📋'};
-      var dateStr = '';
-      if (t.due_date) {
-        var d = new Date(t.due_date);
-        dateStr = DAY_BG_SHORT[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1<10?'0':'') + (d.getMonth()+1);
-      }
+      var d = new Date(dayISO + 'T12:00:00');
+      var dateStr = DAY_BG_SHORT[d.getDay()] + ' ' + d.getDate() + '.' + (d.getMonth()+1<10?'0':'') + (d.getMonth()+1);
       var meta = dept.icon + ' ' + dept.label + (dateStr ? ' · ' + dateStr : '') + (t.description ? ' · ' + t.description : '');
       portalForToday.push(Object.assign({
         id: 'portal-' + t.id,
@@ -876,17 +866,13 @@ function renderToday() {
     });
   }
 
-  // Постоянни задачи от портала — ден 0=пон … 6=нед
+  // Постоянни задачи от портала — версии, периоди, изключвания, прозорци
   // Постоянна задача, свързана (rt) с видим ред от BASE или REG_885, не се показва отделно
-  const portalDow = (dow + 6) % 7;
   const todayLocal = localISO(now);
   const regVisible = !mgrStore && dow >= 1 && dow <= 5 && storeFilter !== 'Раднево';
   const linkedRt = new Set([...base, ...(regVisible ? REG_885.filter(r => reg885Active(r, now)) : [])].map(x => x.rt).filter(Boolean));
-  const recTasks = (portalRecurring || []).filter(r => {
-    // без due_weekdays и due_weekday — всеки работен ден (пон–пет)
-    const days = r.due_weekdays || (r.due_weekday != null ? [r.due_weekday] : [0, 1, 2, 3, 4]);
-    return days.includes(portalDow) && storeMatch(r.target_stores) && !linkedRt.has(r.id);
-  }).map(r => {
+  const recAll = portalRecurringForDate(now).filter(r => portalRecurringForStore(r) && !linkedRt.has(r.id));
+  const recRow = (r, group) => {
     const isRm = r.department === 'warehouse' || r.department === 'admin';
     const dept = DEPT_LABELS[r.department] || {label: r.department || '', icon: '📋'};
     return Object.assign({
@@ -894,11 +880,14 @@ function renderToday() {
       t: escHtml(r.title),
       m: dept.icon + ' ' + dept.label + (r.due_time ? ' · до ' + r.due_time : ''),
       c: isRm ? 'b' : 'g',
-      bl: 'Постоянни задачи (портал)',
+      bl: group,
       role: isRm ? 'rm' : 'mag',
       bulletin: true
-    }, portalStatusFields('recurring_task_id', r.id, todayLocal));
-  });
+    }, portalStatusFields('recurring_task_id', r.id, recurringDoneDates(r, now)));
+  };
+  const recTasks = recAll.filter(r => recurringDueOnDate(r, now)).map(r => recRow(r, 'Постоянни задачи (портал)'));
+  // Без ден и час — отделна група, извън дневния брояч
+  const noDueTasks = recAll.filter(r => recurringIsNoDue(r)).map(r => Object.assign(recRow(r, 'Текущи / без срок'), {noCount: true}));
 
   // Manual bulletin tasks (non-portal)
   const bTasks = bulletin.filter(b => !b.fromPortal && (b.day === dayName || b.day === 'Всеки ден')).map((b,i) => ({
@@ -917,7 +906,7 @@ function renderToday() {
         const due = r.due === 'last' ? new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() : r.due;
         const dueLbl = due ? 'срок ' + (due < 10 ? '0' : '') + due + '.' + (now.getMonth() < 9 ? '0' : '') + (now.getMonth() + 1) : '';
         const cl = reg885Checklist(r);
-        const rc = r.rt ? portalCompletion('Кърджали', 'recurring_task_id', r.rt, todayLocal) : null;
+        const rc = r.rt ? portalCompletion('Кърджали', 'recurring_task_id', r.rt, rtDoneDates(r.rt, now)) : null;
         const rcDone = !!(rc && rc.status === 'done');
         return {
           locked: !!(cl && cl.ok) || rcDone,
@@ -939,7 +928,8 @@ function renderToday() {
       })
     : [];
 
-  const tasks = [...base.map(t => t.rt ? Object.assign({}, t, rtBaseFields(t.rt, todayLocal)) : t), ...portalForToday, ...recTasks, ...bTasks, ...regTasks];
+  const tasks = [...base.map(t => t.rt ? Object.assign({}, t, rtBaseFields(t.rt, rtDoneDates(t.rt, now))) : t), ...portalForToday, ...recTasks, ...bTasks, ...regTasks];
+  const allRows = tasks.concat(noDueTasks);
 
   document.querySelectorAll('.store-btn').forEach(b => b.classList.toggle('on', b.dataset.store === storeFilter));
 
@@ -947,7 +937,7 @@ function renderToday() {
   const n = new Date();
   document.getElementById('today-sub').textContent = n.getDate()+' '+MON[n.getMonth()]+' '+n.getFullYear();
 
-  if (!tasks.length || dow===0 || dow===6) {
+  if ((!tasks.length && !noDueTasks.length) || dow===0 || dow===6) {
     document.getElementById('task-list').innerHTML = '<div style="text-align:center;padding:36px 0;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">🏖</div><div>Почивен ден — зарежда се утре!</div></div>';
     updateStats([]);
     return;
@@ -955,7 +945,7 @@ function renderToday() {
 
   // Group by bl
   const groups = {};
-  tasks.forEach(t => { const g=t.bl||'Задачи'; if(!groups[g]) groups[g]=[]; groups[g].push(t); });
+  allRows.forEach(t => { const g=t.bl||'Задачи'; if(!groups[g]) groups[g]=[]; groups[g].push(t); });
   let html = '';
   const ps885 = portalStatus['Кърджали'];
   for (const [g, items] of Object.entries(groups)) {
@@ -1311,6 +1301,9 @@ function escHtml(str) {
 // ── PORTAL STATUS (Кърджали / Раднево) — само четене ─────────────────
 var portalStatus = {};       // store -> {completions, checklist, at}
 var portalRecurring = null;  // recurring_tasks, общи за всички обекти
+var portalRecurringVersions = [];  // recurring_task_versions
+var portalRecurringPeriods = [];   // recurring_task_periods
+var portalRecurringSkips = [];     // recurring_task_skips за текущата ISO седмица
 var portalRecurringReq = null;
 var PORTAL_GREY = 'background:var(--bg3);color:var(--muted)';
 
@@ -1324,15 +1317,196 @@ function hhmm(d) {
   return (d.getHours() < 10 ? '0' : '') + d.getHours() + ':' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes();
 }
 
+// ── ПРАВИЛА НА ПОРТАЛА „какво се прави на дата D" ────────────────────
+// Пренесени от Tmax-store-portal: shared.js (notice, spans_from/starts_on,
+// периоди, версии, изключвания) и bulletin.js (due_dates, прозорци, дължима
+// ли е постоянната задача днес). Тук само се четат.
+function taskIsNotice(t) { return !!t && t.task_type === 'notice'; }
+function taskDueDates(t) {
+  if (t.due_dates && t.due_dates.length) return t.due_dates.map(function(d) { return String(d).slice(0, 10); });
+  if (t.due_date) return [String(t.due_date).slice(0, 10)];
+  return [];
+}
+function taskIsDueOnDate(t, dateISO) { return taskDueDates(t).indexOf(dateISO) >= 0; }
+function taskSpansWeeks(t) { return !!t && !!t.spans_from; }
+function taskSpanDue(t) {
+  if (!taskSpansWeeks(t)) return null;
+  var d = taskDueDates(t);
+  return d.length ? d[0] : null;
+}
+function taskSpanStart(t) {
+  if (!taskSpansWeeks(t)) return null;
+  return t.starts_on ? String(t.starts_on).slice(0, 10) : String(t.spans_from).slice(0, 10);
+}
+// Влязла ли е в сила: без starts_on важи винаги, с празна дата — не
+function taskInForce(t, todayISO) {
+  if (!t || !t.starts_on) return true;
+  if (!todayISO) return false;
+  return String(t.starts_on).slice(0, 10) <= String(todayISO).slice(0, 10);
+}
+function mondayISOOf(d) {
+  return localISO(new Date(d.getFullYear(), d.getMonth(), d.getDate() - (d.getDay() + 6) % 7));
+}
+function sundayISOOf(mondayISO) {
+  var x = new Date(mondayISO + 'T00:00:00');
+  x.setDate(x.getDate() + 6);
+  return localISO(x);
+}
+// Многоседмичните задачи, видими в тази седмица, но поставени в друга
+function loadSpanningTasks(monISO, sunISO, todayISO) {
+  if (!monISO || !sunISO) return Promise.resolve([]);
+  var q = 'select=*,bulletins!inner(id,status,week_number,year)&spans_from=not.is.null' +
+    '&spans_from=lte.' + sunISO + '&due_date=gte.' + monISO + '&bulletins.status=eq.published';
+  if (todayISO) q += '&or=(starts_on.is.null,starts_on.lte.' + todayISO + ')';
+  return sbFetch('bulletin_tasks', q).then(function(rows) {
+    return (Array.isArray(rows) ? rows : []).filter(function(t) {
+      if (!t || !t.spans_from) return false;
+      var from = String(t.spans_from).slice(0, 10), due = taskSpanDue(t);
+      if (!due || from > sunISO || due < monISO) return false;
+      if (todayISO && !taskInForce(t, todayISO)) return false;
+      return !!(t.bulletins && t.bulletins.status === 'published');
+    });
+  }).catch(function() { return []; });
+}
+function mergeSpanningTasks(own, spanning) {
+  var out = Array.isArray(own) ? own.slice() : [];
+  var have = {};
+  out.forEach(function(t) { have[String(t.id)] = 1; });
+  (Array.isArray(spanning) ? spanning : []).forEach(function(t) {
+    if (!t || have[String(t.id)]) return;
+    have[String(t.id)] = 1; out.push(t);
+  });
+  return out;
+}
+// Изключена за седмицата: глобално (store_name null) или за конкретния обект
+function recurringIsSkipped(taskId, store, skips) {
+  if (!Array.isArray(skips) || !skips.length) return false;
+  var id = String(taskId);
+  return skips.some(function(s) {
+    if (!s || String(s.recurring_task_id) !== id) return false;
+    return s.store_name === null || s.store_name === undefined || (!!store && s.store_name === store);
+  });
+}
+// Важи ли задачата за седмицата (recurring_task_periods)
+function recurringValidForWeek(taskId, mondayISO, periods) {
+  if (!Array.isArray(periods) || !mondayISO) return false;
+  var id = String(taskId);
+  return periods.some(function(p) {
+    return !!p && String(p.recurring_task_id) === id && p.from_monday <= mondayISO &&
+      (p.to_monday === null || p.to_monday === undefined || p.to_monday >= mondayISO);
+  });
+}
+// Съдържанието за седмицата (recurring_task_versions) — печели най-късният from_monday
+var RECURRING_CONTENT_FIELDS = ['title','description','due_weekday','due_weekdays','due_window','due_time','task_type','department','target_stores'];
+function recurringVersionForWeek(taskId, mondayISO, versions) {
+  if (!Array.isArray(versions) || !mondayISO) return null;
+  var id = String(taskId), best = null;
+  versions.forEach(function(v) {
+    if (!v || String(v.recurring_task_id) !== id) return;
+    if (v.from_monday > mondayISO) return;
+    if (v.to_monday !== null && v.to_monday !== undefined && v.to_monday < mondayISO) return;
+    if (!best || v.from_monday > best.from_monday) best = v;
+  });
+  return best;
+}
+function recurringApplyVersion(task, versions, mondayISO) {
+  var v = task ? recurringVersionForWeek(task.id, mondayISO, versions) : null;
+  if (!v) return task;
+  var out = {};
+  for (var k in task) { if (Object.prototype.hasOwnProperty.call(task, k)) out[k] = task[k]; }
+  RECURRING_CONTENT_FIELDS.forEach(function(f) { if (f in v) out[f] = v[f]; });
+  return out;
+}
+function recurringTasksForWeek(tasks, periods, mondayISO, versions) {
+  var list = Array.isArray(tasks) ? tasks : [];
+  if (!mondayISO) return list.filter(function(t) { return !!t && !!t.active; });
+  var has = {};
+  (Array.isArray(periods) ? periods : []).forEach(function(p) { if (p) has[String(p.recurring_task_id)] = 1; });
+  var out = list.filter(function(t) {
+    if (!t) return false;
+    return has[String(t.id)] ? recurringValidForWeek(t.id, mondayISO, periods) : !!t.active;
+  });
+  if (!Array.isArray(versions) || !versions.length) return out;
+  return out.map(function(t) { return recurringApplyVersion(t, versions, mondayISO); });
+}
+// Прозорец за изпълнение (due_window): последният ден е срокът, една отметка затваря седмицата
+function recurringIsWindow(t) {
+  if (!t || !t.due_window) return false;
+  var d = (t.due_weekdays && t.due_weekdays.length) ? t.due_weekdays : [];
+  return d.length > 1 && d.length < 7;
+}
+function recurringWindowIdxs(t) {
+  return ((t && t.due_weekdays) || []).slice().sort(function(a, b) { return a - b; });
+}
+function recurringWindowDeadlineIdx(t) {
+  var d = recurringWindowIdxs(t);
+  return d.length ? d[d.length - 1] : null;
+}
+function recurringWindowDatesForDate(t, d) {
+  if (!recurringIsWindow(t)) return [];
+  var mon = new Date(mondayISOOf(d) + 'T00:00:00');
+  return recurringWindowIdxs(t).map(function(i) {
+    var x = new Date(mon); x.setDate(mon.getDate() + i); return localISO(x);
+  });
+}
+function recurringIsDueOnWeekday(t, idx) {
+  if (t.due_weekdays && t.due_weekdays.length) return t.due_weekdays.indexOf(idx) >= 0;
+  if (t.due_weekday === null || t.due_weekday === undefined) return !!t.due_time;
+  return t.due_weekday === idx;
+}
+// Прозоречната се явява ВЕДНЪЖ — в деня на срока (както в отчетите на портала)
+function recurringDueOnDate(t, d) {
+  var idx = (d.getDay() + 6) % 7;
+  if (recurringIsWindow(t)) return idx === recurringWindowDeadlineIdx(t);
+  return recurringIsDueOnWeekday(t, idx);
+}
+// „Текущи / без срок" — нито ден, нито час
+function recurringIsNoDue(t) {
+  return (t.due_weekday === null || t.due_weekday === undefined) && !t.due_time;
+}
+// Постоянните задачи за дадена дата: периоди + версии, без notice и глобално изключените
+function portalRecurringForDate(d) {
+  return recurringTasksForWeek(portalRecurring || [], portalRecurringPeriods, mondayISOOf(d), portalRecurringVersions)
+    .filter(function(t) { return !taskIsNotice(t) && !recurringIsSkipped(t.id, null, portalRecurringSkips); });
+}
+// Важи ли за избрания обект: target_stores + изключване по обект
+function portalRecurringForStore(t) {
+  if (!storeMatch(t.target_stores)) return false;
+  if (storeFilter === 'Всички') return true;
+  return !recurringIsSkipped(t.id, storeFilter, portalRecurringSkips);
+}
+// Датите, с които се затваря постоянната задача: прозорец → целият прозорец
+function recurringDoneDates(t, d) {
+  return recurringIsWindow(t) ? recurringWindowDatesForDate(t, d) : localISO(d);
+}
+function portalRecurringById(id, d) {
+  var list = portalRecurringForDate(d);
+  for (var i = 0; i < list.length; i++) { if (list[i].id === id) return list[i]; }
+  return null;
+}
+// Същото правило за редовете от BASE/REG_885, вързани с rt
+function rtDoneDates(rt, d) {
+  var t = portalRecurringById(rt, d);
+  return t ? recurringDoneDates(t, d) : localISO(d);
+}
+
 function loadPortalStatus(store) {
   var now = new Date();
   var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (now.getDay() + 6) % 7);
   var wk = isoWeekKey(now).split('-W');
   var st = encodeURIComponent(store);
   if (!portalRecurringReq) {
-    portalRecurringReq = sbFetch('recurring_tasks', 'active=eq.true&select=id,title,department,due_weekdays,due_weekday,due_time,target_stores')
-      .then(function(r) { portalRecurring = Array.isArray(r) ? r : []; })
-      .catch(function() { portalRecurringReq = null; });
+    portalRecurringReq = Promise.all([
+      sbFetch('recurring_tasks', 'active=eq.true&order=sort_order.asc&select=id,title,active,department,due_weekdays,due_weekday,due_window,due_time,task_type,target_stores'),
+      sbFetch('recurring_task_versions', 'select=recurring_task_id,from_monday,to_monday,' + RECURRING_CONTENT_FIELDS.join(',') + '&order=from_monday.asc').catch(function() { return []; }),
+      sbFetch('recurring_task_periods', 'select=recurring_task_id,from_monday,to_monday').catch(function() { return []; }),
+      sbFetch('recurring_task_skips', 'year=eq.' + wk[0] + '&week_number=eq.' + (+wk[1]) + '&select=recurring_task_id,store_name').catch(function() { return []; })
+    ]).then(function(r) {
+      portalRecurring = Array.isArray(r[0]) ? r[0] : [];
+      portalRecurringVersions = Array.isArray(r[1]) ? r[1] : [];
+      portalRecurringPeriods = Array.isArray(r[2]) ? r[2] : [];
+      portalRecurringSkips = Array.isArray(r[3]) ? r[3] : [];
+    }).catch(function() { portalRecurringReq = null; });
   }
   return Promise.all([
     sbFetch('task_completions', 'store_name=eq.' + st + '&completion_date=gte.' + localISO(monday) + '&select=task_id,recurring_task_id,status,completion_date,completed_at,completed_by,postponed_to'),
@@ -1348,12 +1522,13 @@ function loadPortalStatus(store) {
 }
 
 // Запис от task_completions за обекта; 'done' има предимство пред 'postponed', после по-новият
-function portalCompletion(store, key, id, dateISO) {
+function portalCompletion(store, key, id, when) {
   var ps = portalStatus[store];
   if (!ps) return null;
+  var dates = when ? (Array.isArray(when) ? when : [when]) : null;
   var hit = null;
   ps.completions.forEach(function(c) {
-    if (c[key] !== id || (dateISO && c.completion_date !== dateISO)) return;
+    if (c[key] !== id || (dates && dates.indexOf(c.completion_date) < 0)) return;
     var cDone = c.status === 'done', hDone = hit && hit.status === 'done';
     if (!hit || (cDone && !hDone) || (cDone === hDone && c.completion_date > hit.completion_date)) hit = c;
   });
@@ -1557,9 +1732,13 @@ function loadPortalBulletin() {
       if (titleEl) titleEl.textContent = 'Т-Бюлетин — Седмица ' + bulWk;
       if (subEl) subEl.textContent = 'С' + bulWk + ' · ' + bulYr + (bul.status === 'draft' ? ' · Чернова' : ' · Публикуван');
 
-      return sbFetch('bulletin_tasks', 'bulletin_id=eq.' + bul.id + '&order=due_date.asc')
-        .then(function(tasks) {
-          portalTasks = Array.isArray(tasks) ? tasks : [];
+      var wkMon = mondayISOOf(now);
+      return Promise.all([
+        sbFetch('bulletin_tasks', 'bulletin_id=eq.' + bul.id + '&order=due_date.asc'),
+        loadSpanningTasks(wkMon, sundayISOOf(wkMon), localISO(now))
+      ])
+        .then(function(tt) {
+          portalTasks = mergeSpanningTasks(Array.isArray(tt[0]) ? tt[0] : [], tt[1]);
 
           // ALWAYS inject into Today - regardless of which panel is open
           injectPortalTasksToday(portalTasks, bulWk);
@@ -2019,22 +2198,22 @@ function renderWeekPortalTasks() {
   };
 
   console.log('renderWeekPortalTasks: portalTasks='+portalTasks.length+' weekStart='+weekStartISO+' weekEnd='+weekEndISO);
+  var weekTodayISO = localISO(now);
   portalTasks.forEach(function(t) {
     if (!storeMatch(t.target_stores)) return;
-    if (!t.due_date) {
-      noDayTasks.push(t);
-      console.log('  no-date task:', t.title);
-      return;
-    }
-    var taskDate = t.due_date.slice(0,10);
-    console.log('  task:', t.title, 'date:', taskDate, 'in range:', taskDate >= weekStartISO && taskDate <= weekEndISO);
-    if (taskDate >= weekStartISO && taskDate <= weekEndISO) {
-      var d = new Date(t.due_date + 'T12:00:00');
+    var dates = taskDueDates(t);
+    var placed = false;
+    dates.forEach(function(ds) {
+      if (ds < weekStartISO || ds > weekEndISO) return;
+      var d = new Date(ds + 'T12:00:00');
       var taskDow = d.getDay();
-      if (taskDow >= 1 && taskDow <= 5) {
-        byDay[taskDow].push(t);
-      }
-    }
+      if (taskDow >= 1 && taskDow <= 5) { byDay[taskDow].push(t); placed = true; }
+    });
+    if (placed) return;
+    // Многоседмична, която тече през тази седмица, но срокът ѝ е по-късно
+    if (taskSpansWeeks(t) && taskInForce(t, weekTodayISO) &&
+        taskSpanStart(t) <= weekEndISO && taskSpanDue(t) >= weekStartISO) { noDayTasks.push(t); return; }
+    if (!dates.length) noDayTasks.push(t);
   });
 
   var html = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">';
