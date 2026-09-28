@@ -841,13 +841,15 @@ function renderToday() {
   weekStart.setHours(0,0,0,0);
   var weekStartISO = localISO(weekStart);
 
-  // Задачи от бюлетина — по правилата на портала: due_dates, starts_on, notice отпада
+  // Задачи от бюлетина — по правилата на портала: due_dates, starts_on.
+  // notice отиват в „Само за информация" (както в плана за деня на портала).
   var portalForToday = [];
+  var noticeRows = [];
   if (portalTasks && portalTasks.length) {
     portalTasks.forEach(function(t) {
-      if (taskIsNotice(t)) return;
       if (!storeMatch(t.target_stores)) return;
       if (!taskIsDueOnDate(t, dayISO) || !taskInForce(t, dayISO)) return;
+      if (taskIsNotice(t)) { noticeRows.push(noticeRow(t, false)); return; }
       var st = portalStatusFields('task_id', t.id, dayISO);
       var isRmControl = t.department === 'warehouse' || t.department === 'admin';
       var dept = DEPT_LABELS[t.department] || {label: t.department || '', color: 'var(--muted)', icon: '📋'};
@@ -871,7 +873,9 @@ function renderToday() {
   const todayLocal = localISO(now);
   const regVisible = !mgrStore && dow >= 1 && dow <= 5 && storeFilter !== 'Раднево';
   const linkedRt = new Set([...base, ...(regVisible ? REG_885.filter(r => reg885Active(r, now)) : [])].map(x => x.rt).filter(Boolean));
-  const recAll = portalRecurringForDate(now).filter(r => portalRecurringForStore(r) && !linkedRt.has(r.id));
+  const recAllRaw = portalRecurringAllForDate(now).filter(r => portalRecurringForStore(r) && !linkedRt.has(r.id));
+  const recAll = recAllRaw.filter(r => !taskIsNotice(r));
+  recAllRaw.forEach(r => { if (taskIsNotice(r) && recurringDueOnDate(r, now)) noticeRows.push(noticeRow(r, true)); });
   const recRow = (r, group) => {
     const isRm = r.department === 'warehouse' || r.department === 'admin';
     const dept = DEPT_LABELS[r.department] || {label: r.department || '', icon: '📋'};
@@ -929,7 +933,7 @@ function renderToday() {
     : [];
 
   const tasks = [...base.map(t => t.rt ? Object.assign({}, t, rtBaseFields(t.rt, rtDoneDates(t.rt, now))) : t), ...portalForToday, ...recTasks, ...bTasks, ...regTasks];
-  const allRows = tasks.concat(noDueTasks);
+  const allRows = tasks.concat(noticeRows, noDueTasks);
 
   document.querySelectorAll('.store-btn').forEach(b => b.classList.toggle('on', b.dataset.store === storeFilter));
 
@@ -937,7 +941,7 @@ function renderToday() {
   const n = new Date();
   document.getElementById('today-sub').textContent = n.getDate()+' '+MON[n.getMonth()]+' '+n.getFullYear();
 
-  if ((!tasks.length && !noDueTasks.length) || dow===0 || dow===6) {
+  if ((!tasks.length && !noDueTasks.length && !noticeRows.length) || dow===0 || dow===6) {
     document.getElementById('task-list').innerHTML = '<div style="text-align:center;padding:36px 0;color:var(--muted)"><div style="font-size:28px;margin-bottom:8px">🏖</div><div>Почивен ден — зарежда се утре!</div></div>';
     updateStats([]);
     return;
@@ -956,8 +960,8 @@ function renderToday() {
       const bCls = t.bulletin ? ' bulletin' : '';
       const roleBdg = mgrStore ? '' : t.role==='rm' ? '<span class="bdg" style="background:rgba(91,155,213,.2);color:var(--blue);margin-left:3px">РМ</span>'
                     : t.role==='mag' ? '<span class="bdg" style="background:rgba(78,201,148,.2);color:var(--green);margin-left:3px">Магазин</span>' : '';
-      html += `<div class="task${bCls}${isDone?' done':''}" data-id="${t.id}" style="--tc:${C[t.c]||'var(--border)'}${t.locked?';cursor:default':''}"${t.locked?'':` onclick="toggleTask('${t.id}')"`}>
-        <div class="t-chk">${isDone?'✓':''}</div>
+      html += `<div class="task${bCls}${isDone?' done':''}" data-id="${t.id}" style="--tc:${C[t.c]||'var(--border)'}${(t.locked||t.notice)?';cursor:default':''}"${(t.locked||t.notice)?'':` onclick="toggleTask('${t.id}')"`}>
+        <div class="t-chk"${t.notice?' style="border-color:transparent"':''}>${isDone?'✓':''}</div>
         <div class="t-body">
           <div class="t-title">${t.t}</div>
           ${t.m?`<div class="t-meta">${t.m}</div>`:''}
@@ -1464,10 +1468,14 @@ function recurringDueOnDate(t, d) {
 function recurringIsNoDue(t) {
   return (t.due_weekday === null || t.due_weekday === undefined) && !t.due_time;
 }
-// Постоянните задачи за дадена дата: периоди + версии, без notice и глобално изключените
-function portalRecurringForDate(d) {
+// Постоянните задачи за дадена дата: периоди + версии, без глобално изключените.
+// Видът (notice) се чете СЛЕД версиите — задача може да е info само тази седмица.
+function portalRecurringAllForDate(d) {
   return recurringTasksForWeek(portalRecurring || [], portalRecurringPeriods, mondayISOOf(d), portalRecurringVersions)
-    .filter(function(t) { return !taskIsNotice(t) && !recurringIsSkipped(t.id, null, portalRecurringSkips); });
+    .filter(function(t) { return !recurringIsSkipped(t.id, null, portalRecurringSkips); });
+}
+function portalRecurringForDate(d) {
+  return portalRecurringAllForDate(d).filter(function(t) { return !taskIsNotice(t); });
 }
 // Важи ли за избрания обект: target_stores + изключване по обект
 function portalRecurringForStore(t) {
@@ -1497,7 +1505,7 @@ function loadPortalStatus(store) {
   var st = encodeURIComponent(store);
   if (!portalRecurringReq) {
     portalRecurringReq = Promise.all([
-      sbFetch('recurring_tasks', 'active=eq.true&order=sort_order.asc&select=id,title,active,department,due_weekdays,due_weekday,due_window,due_time,task_type,target_stores'),
+      sbFetch('recurring_tasks', 'active=eq.true&order=sort_order.asc&select=id,title,description,active,department,due_weekdays,due_weekday,due_window,due_time,task_type,target_stores'),
       sbFetch('recurring_task_versions', 'select=recurring_task_id,from_monday,to_monday,' + RECURRING_CONTENT_FIELDS.join(',') + '&order=from_monday.asc').catch(function() { return []; }),
       sbFetch('recurring_task_periods', 'select=recurring_task_id,from_monday,to_monday').catch(function() { return []; }),
       sbFetch('recurring_task_skips', 'year=eq.' + wk[0] + '&week_number=eq.' + (+wk[1]) + '&select=recurring_task_id,store_name').catch(function() { return []; })
@@ -1557,6 +1565,23 @@ function portalStatusFields(key, id, dateISO) {
 // Час на изпълнение от completed_at (UTC) в местно време
 function portalDoneTime(c) {
   return c.completed_at ? hhmm(new Date(c.completed_at)) : '';
+}
+
+// Ред „Само за информация" — без чекбокс, без брояч; описанието е самото съдържание
+function noticeRow(t, isRec) {
+  var dept = DEPT_LABELS[t.department] || {label: t.department || '', icon: '📋'};
+  return {
+    id: (isRec ? 'portal-rec-' : 'portal-') + t.id,
+    t: escHtml(t.title || ''),
+    m: dept.icon + ' ' + dept.label + (t.due_time ? ' · до ' + String(t.due_time).slice(0, 5) : ''),
+    sub: t.description ? escHtml(t.description) : '',
+    c: '',
+    bl: 'Само за информация',
+    role: null,
+    bulletin: true,
+    notice: true,
+    noCount: true
+  };
 }
 
 // Ред от BASE със rt: етикет за статуса на обекта, отметката остава ръчна
